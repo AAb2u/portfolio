@@ -1,3 +1,6 @@
+"use client";
+import { motion } from "framer-motion";
+
 const services = [
   {
     num: "01",
@@ -20,20 +23,37 @@ export default function Services() {
   return (
     <section className="px-24 py-24 flex flex-col gap-14 border-t border-border">
 
-      <h2 className="text-sm font-normal text-foreground">I can help you with ...</h2>
+      <motion.h2
+        className="text-sm font-normal text-foreground"
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.5 }}
+      >
+        I can help you with ...
+      </motion.h2>
 
       <div className="grid grid-cols-3 gap-12">
-        {services.map((s) => (
+        {services.map((s, i) => (
           <div key={s.num}>
-            <span className="block text-[72px] font-thin leading-none text-foreground/10 select-none">
+            <motion.span
+              className="block text-[72px] font-thin leading-none text-foreground/10 select-none"
+              initial={{ y: -20, opacity: 0 }}
+              whileInView={{ y: 0, opacity: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: i * 0.15, ease: "easeOut" }}
+            >
               {s.num}
-            </span>
-            <h3 className="mt-5 mb-2 text-[13px] font-semibold tracking-wide">
-              {s.title}
-            </h3>
-            <p className="text-[12px] leading-[1.8] text-muted">
-              {s.desc}
-            </p>
+            </motion.span>
+            <motion.div
+              initial={{ y: 20, opacity: 0 }}
+              whileInView={{ y: 0, opacity: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: i * 0.15 + 0.1, ease: "easeOut" }}
+            >
+              <h3 className="mt-5 mb-2 text-[13px] font-semibold tracking-wide">{s.title}</h3>
+              <p className="text-[12px] leading-[1.8] text-muted">{s.desc}</p>
+            </motion.div>
           </div>
         ))}
       </div>

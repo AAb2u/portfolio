@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { motion } from "framer-motion";
 
 const steps = [
   {
@@ -30,8 +31,13 @@ export default function Process() {
   return (
     <section id="process" className="px-24 py-28 border-t border-border">
       <div className="grid grid-cols-2 gap-16 items-start">
-        {/* Left */}
-        <div>
+
+        <motion.div
+          initial={{ x: -40, opacity: 0 }}
+          whileInView={{ x: 0, opacity: 1 }}
+          viewport={{ once: true, margin: "-60px" }}
+          transition={{ duration: 0.7, ease: [0.25, 0.1, 0.25, 1] }}
+        >
           <h2 className="text-4xl font-semibold leading-tight mb-6">
             My way of getting things done
           </h2>
@@ -41,12 +47,18 @@ export default function Process() {
             Standing by the Waterfall methodology, I assure a step by step
             completion of the whole process.
           </p>
-        </div>
+        </motion.div>
 
-        {/* Right — accordion */}
         <div className="border-t border-border divide-y divide-border">
           {steps.map((s, i) => (
-            <div key={s.num} className="py-4">
+            <motion.div
+              key={s.num}
+              className="py-4"
+              initial={{ x: 40, opacity: 0 }}
+              whileInView={{ x: 0, opacity: 1 }}
+              viewport={{ once: true, margin: "-60px" }}
+              transition={{ duration: 0.5, delay: i * 0.1, ease: [0.25, 0.1, 0.25, 1] }}
+            >
               <button
                 className="flex items-center justify-between w-full text-left group"
                 onClick={() => setOpen(open === i ? null : i)}
@@ -60,13 +72,19 @@ export default function Process() {
                 </span>
               </button>
               {open === i && (
-                <p className="mt-3 text-[12px] text-muted leading-[1.75] pr-8">
+                <motion.p
+                  className="mt-3 text-[12px] text-muted leading-[1.75] pr-8"
+                  initial={{ opacity: 0, y: -8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                >
                   {s.desc}
-                </p>
+                </motion.p>
               )}
-            </div>
+            </motion.div>
           ))}
         </div>
+
       </div>
     </section>
   );
