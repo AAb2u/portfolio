@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import Cursor from "./components/Cursor";
+import Loader from "./components/Loader";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -30,6 +31,7 @@ export default function RootLayout({
             if(t==='dark'||(t===null&&d))document.documentElement.classList.add('dark');
           })();
         `}</Script>
+        <Loader />
         <Cursor />
         {children}
       </body>
