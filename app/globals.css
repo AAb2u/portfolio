@@ -8,11 +8,10 @@
   --font-sans: var(--font-inter);
 }
 
-html.dark {
-  --color-background: #111111;
-  --color-foreground: #E9E9E3;
-  --color-muted: #666666;
-  --color-border: #2a2a2a;
+
+html {
+  overscroll-behavior: none;
+  background: #111827; /* matches last section — prevents white flash on overscroll */
 }
 
 body {
@@ -22,10 +21,8 @@ body {
   overflow-x: hidden;
   transition: background 0.2s, color 0.2s;
   cursor: none;
+  scrollbar-width: thin;
+  overscroll-behavior: none;
 }
 
 a, button { cursor: none; }
-
-body {
-  scrollbar-width: thin;
-}

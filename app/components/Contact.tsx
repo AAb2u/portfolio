@@ -1,80 +1,173 @@
 "use client";
 import Image from "next/image";
-import { motion } from "framer-motion";
-import TextReveal from "./TextReveal";
+import { useEffect, useState } from "react";
+
+const BG    = "#111827";
+const FG    = "#E9E9E3";
+const MUTED = "rgba(233,233,227,0.4)";
+const BORDER = "rgba(233,233,227,0.1)";
 
 export default function Contact() {
-  const links = [
+  const [time, setTime] = useState("");
+
+  useEffect(() => {
+    const fmt = () =>
+      new Date().toLocaleTimeString("en-US", {
+        hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false,
+      });
+    setTime(fmt());
+    const id = setInterval(() => setTime(fmt()), 1000);
+    return () => clearInterval(id);
+  }, []);
+
+  const socials = [
     { label: "GitHub",    href: "https://github.com/AAb2u" },
     { label: "LinkedIn",  href: "https://www.linkedin.com/in/akrour-abdenour-08a10235b" },
     { label: "Instagram", href: "https://www.instagram.com/12dou__/" },
-    { label: "Email",     href: "mailto:akrourabdenour9@gmail.com" },
   ];
 
   return (
-    <section id="contact" className="px-24 pt-28 pb-10 flex flex-col gap-20 border-t border-border">
+    <section
+      id="contact"
+      style={{ backgroundColor: BG, color: FG, height: "100vh", display: "flex", flexDirection: "column" }}
+    >
+      {/* ── Main content — grouped at top ── */}
+      <div className="w-full max-w-4xl mx-auto px-8 pt-16 flex flex-col">
 
-      <div className="flex items-end justify-between gap-8">
-        <motion.h2
-          className="text-[clamp(28px,4vw,52px)] font-medium leading-[1.15] tracking-tight max-w-2xl"
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.7, ease: [0.25, 0.1, 0.25, 1] }}
-        >
-          <motion.span
-            className="relative inline-block float-left mr-5 mt-2"
-            initial={{ scale: 0.7, opacity: 0 }}
-            whileInView={{ scale: 1, opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.1, type: "spring", stiffness: 200, damping: 20 }}
+        {/* Heading */}
+        <div style={{ fontSize: "clamp(48px, 8.5vw, 120px)", fontWeight: 300, lineHeight: 1, letterSpacing: "-0.02em" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "clamp(16px, 2vw, 32px)" }}>
+            {/* Avatar */}
+            <div style={{ position: "relative", flexShrink: 0, width: "clamp(48px, 5.5vw, 80px)", height: "clamp(48px, 5.5vw, 80px)" }}>
+              <Image
+                src="https://media.licdn.com/dms/image/v2/D4E03AQGjMu8_MuzK0w/profile-displayphoto-shrink_400_400/B4EZYQZkQkHYAg-/0/1744031860160?e=1781136000&v=beta&t=Ot5t_aSxyNQbIVf-9KDsPS3lJUiWNnGRGEnyZVY-WsE"
+                alt="Abdenour Akrour"
+                fill
+                className="rounded-full object-cover"
+              />
+              <span style={{ position: "absolute", bottom: 2, right: 2, width: 10, height: 10, background: "#4ade80", borderRadius: "50%", border: `2px solid ${BG}` }} />
+            </div>
+            <span>Let&apos;s work</span>
+          </div>
+          <div>together.</div>
+        </div>
+
+        {/* Divider with CTA circle pinned on the right, centered on the line */}
+        <div style={{ position: "relative", display: "flex", alignItems: "center", marginTop: "clamp(40px, 6vw, 80px)" }}>
+          {/* Line runs full width, passes behind the button */}
+          <div style={{ flex: 1, height: 1, backgroundColor: BORDER }} />
+          {/* Circle CTA — absolutely on the right, vertically centered on the line */}
+          <a
+            href="mailto:akrourabdenour9@gmail.com"
+            style={{
+              position: "absolute",
+              right: 0,
+              width: "clamp(120px,10vw,160px)",
+              height: "clamp(120px,10vw,160px)",
+              borderRadius: "50%",
+              backgroundColor: FG,
+              color: BG,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: 13,
+              fontWeight: 600,
+              textDecoration: "none",
+              transition: "transform 0.25s",
+            }}
+            onMouseEnter={e => (e.currentTarget.style.transform = "scale(1.06)")}
+            onMouseLeave={e => (e.currentTarget.style.transform = "scale(1)")}
           >
-            <Image
-              src="https://media.licdn.com/dms/image/v2/D4E03AQGjMu8_MuzK0w/profile-displayphoto-shrink_400_400/B4EZYQZkQkHYAg-/0/1744031860160?e=1781136000&v=beta&t=Ot5t_aSxyNQbIVf-9KDsPS3lJUiWNnGRGEnyZVY-WsE"
-              alt="Abdenour Akrour"
-              width={72}
-              height={72}
-              className="rounded-full"
-            />
-            <span className="absolute bottom-1 right-0.5 w-3.5 h-3.5 bg-green-500 rounded-full border-2 border-background animate-pulse" />
-          </motion.span>
-          Let's talk about a project, collaboration or an idea you may have
-        </motion.h2>
+            Get in touch
+          </a>
+        </div>
 
-        <motion.a
-          href="mailto:akrourabdenour9@gmail.com"
-          className="flex-shrink-0 inline-flex items-center gap-3 bg-foreground text-background text-sm font-semibold px-8 py-4 rounded-full"
-          initial={{ opacity: 0, scale: 0.9 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5, delay: 0.3, type: "spring", stiffness: 200, damping: 18 }}
-        >
-          <TextReveal text="Let's start a project" duration={800} />
-          <svg width="14" height="14" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M2 10L10 2M10 2H4M10 2v6" />
-          </svg>
-        </motion.a>
-      </div>
-
-      <motion.div
-        className="flex items-center justify-between border-t border-border pt-6 text-[11px] text-muted"
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.5, delay: 0.2 }}
-      >
-        <span>© 2025 Abdenour Akrour. All Rights Reserved.</span>
-        <div className="flex gap-6">
-          {links.map((l) => (
-            <a key={l.label} href={l.href} target="_blank" rel="noopener noreferrer">
-              <TextReveal text={l.label} duration={600} />
+        {/* Pills */}
+        <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 28 }}>
+          {[
+            { text: "akrourabdenour9@gmail.com", href: "mailto:akrourabdenour9@gmail.com", external: false },
+            { text: "github.com/AAb2u ↗",        href: "https://github.com/AAb2u",         external: true  },
+          ].map(({ text, href, external }) => (
+            <a
+              key={text}
+              href={href}
+              {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 6,
+                border: `1px solid ${BORDER}`,
+                color: MUTED,
+                fontSize: 13,
+                padding: "10px 20px",
+                borderRadius: 999,
+                textDecoration: "none",
+                transition: "border-color 0.2s, color 0.2s",
+              }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = "rgba(233,233,227,0.35)"; e.currentTarget.style.color = FG; }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = BORDER; e.currentTarget.style.color = MUTED; }}
+            >
+              {text}
             </a>
           ))}
         </div>
-        <a href="#">
-          <TextReveal text="Back to top ↑" duration={600} />
-        </a>
-      </motion.div>
+      </div>
+
+      {/* ── Spacer pushes footer to bottom ── */}
+      <div style={{ flex: 1 }} />
+
+      {/* ── Footer ── */}
+      <div className="px-12 md:px-24 pb-8">
+        <div style={{ height: 1, backgroundColor: BORDER, marginBottom: 20 }} />
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16, fontSize: 11 }}>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+            <span style={{ color: MUTED, textTransform: "uppercase", letterSpacing: "0.1em" }}>Version</span>
+            <span style={{ color: FG }}>2025 © Edition</span>
+            <span style={{ color: MUTED }}>Next.js · TypeScript</span>
+          </div>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+            <span style={{ color: MUTED, textTransform: "uppercase", letterSpacing: "0.1em" }}>Location</span>
+            <span style={{ color: FG }}>Algiers, Algeria</span>
+            <span style={{ color: MUTED }}>UTC +1</span>
+          </div>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+            <span style={{ color: MUTED, textTransform: "uppercase", letterSpacing: "0.1em" }}>Local Time</span>
+            <span style={{ color: FG }}>{time}</span>
+            <span style={{ color: MUTED }}>Available for work</span>
+          </div>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: 5, alignItems: "flex-end" }}>
+            <span style={{ color: MUTED, textTransform: "uppercase", letterSpacing: "0.1em" }}>Socials</span>
+            <div style={{ display: "flex", gap: 16 }}>
+              {socials.map(s => (
+                <a
+                  key={s.label}
+                  href={s.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ color: MUTED, textDecoration: "none", transition: "color 0.2s" }}
+                  onMouseEnter={e => (e.currentTarget.style.color = FG)}
+                  onMouseLeave={e => (e.currentTarget.style.color = MUTED)}
+                >
+                  {s.label}
+                </a>
+              ))}
+            </div>
+            <a
+              href="#"
+              style={{ color: MUTED, textDecoration: "none", transition: "color 0.2s" }}
+              onMouseEnter={e => (e.currentTarget.style.color = FG)}
+              onMouseLeave={e => (e.currentTarget.style.color = MUTED)}
+            >
+              Back to top ↑
+            </a>
+          </div>
+
+        </div>
+      </div>
 
     </section>
   );

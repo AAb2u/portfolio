@@ -1,27 +1,34 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 
+type CursorMode = "default" | "hover" | "view";
+
 export default function Cursor() {
   const dot = useRef<HTMLDivElement>(null);
   const pos = useRef({ x: 0, y: 0 });
   const current = useRef({ x: 0, y: 0 });
   const raf = useRef<number>(0);
-  const [hovered, setHovered] = useState(false);
+  const [mode, setMode] = useState<CursorMode>("default");
 
   useEffect(() => {
     const move = (e: MouseEvent) => {
       pos.current = { x: e.clientX, y: e.clientY };
     };
 
-    const onEnter = (e: MouseEvent) => {
-      if ((e.target as HTMLElement).closest("a, button")) setHovered(true);
-    };
-    const onLeave = (e: MouseEvent) => {
-      if ((e.target as HTMLElement).closest("a, button")) setHovered(false);
+    const update = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (target.closest("[data-cursor='view']")) {
+        setMode("view");
+      } else if (target.closest("a, button")) {
+        setMode("hover");
+      } else {
+        setMode("default");
+      }
     };
 
+    const onLeave = () => setMode("default");
+
     const loop = () => {
-      // Légère inertie (lerp 0.15)
       current.current.x += (pos.current.x - current.current.x) * 0.15;
       current.current.y += (pos.current.y - current.current.y) * 0.15;
       if (dot.current) {
@@ -31,17 +38,20 @@ export default function Cursor() {
     };
 
     window.addEventListener("mousemove", move);
-    window.addEventListener("mouseover", onEnter);
+    window.addEventListener("mouseover", update);
     window.addEventListener("mouseout", onLeave);
     raf.current = requestAnimationFrame(loop);
 
     return () => {
       window.removeEventListener("mousemove", move);
-      window.removeEventListener("mouseover", onEnter);
+      window.removeEventListener("mouseover", update);
       window.removeEventListener("mouseout", onLeave);
       cancelAnimationFrame(raf.current);
     };
   }, []);
+
+  const size =
+    mode === "view" ? 88 : mode === "hover" ? 22 : 10;
 
   return (
     <div
@@ -49,9 +59,27 @@ export default function Cursor() {
       className="fixed top-0 left-0 z-[9999] pointer-events-none -translate-x-1/2 -translate-y-1/2"
     >
       <div
-        className="rounded-full bg-foreground transition-all duration-200 ease-out"
-        style={{ width: hovered ? 22 : 10, height: hovered ? 22 : 10 }}
-      />
+        className="rounded-full bg-foreground text-background flex items-center justify-center overflow-hidden"
+        style={{
+          width: size,
+          height: size,
+          transition: "width 0.4s cubic-bezier(0.34,1,0.64,1), height 0.4s cubic-bezier(0.34,1,0.64,1)",
+        }}
+      >
+        <span
+          style={{
+            fontSize: mode === "view" ? "0.7rem" : "0",
+            opacity: mode === "view" ? 1 : 0,
+            transition: "font-size 0.3s cubic-bezier(0.34,1,0.64,1), opacity 0.3s ease",
+            fontWeight: 500,
+            letterSpacing: "0.05em",
+            whiteSpace: "nowrap",
+            userSelect: "none",
+          }}
+        >
+          View ↗
+        </span>
+      </div>
     </div>
   );
 }

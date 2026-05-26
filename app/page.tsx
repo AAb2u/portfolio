@@ -3,8 +3,7 @@ import Hero from "./components/Hero";
 import About from "./components/About";
 import Services from "./components/Services";
 import Work from "./components/Work";
-import Process from "./components/Process";
-import Contact from "./components/Contact";
+import ProcessContactReveal from "./components/ProcessContactReveal";
 
 export default function Home() {
   return (
@@ -15,8 +14,7 @@ export default function Home() {
         <About />
         <Services />
         <Work />
-        <Process />
-        <Contact />
+        <ProcessContactReveal />
       </main>
     </>
   );
