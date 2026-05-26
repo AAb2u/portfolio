@@ -32,10 +32,10 @@ export default function Process() {
       <div className="grid grid-cols-2 gap-16 items-start">
         {/* Left */}
         <div>
-          <h2 className="text-2xl font-semibold leading-tight mb-5">
+          <h2 className="text-4xl font-semibold leading-tight mb-6">
             My way of getting things done
           </h2>
-          <p className="text-[12px] text-muted leading-[1.8] max-w-[280px]">
+          <p className="text-base text-muted leading-[1.8] max-w-[340px]">
             Fast and transparent, the path to owning a website that will
             represent your brand in the best of light is only 4 weeks away.
             Standing by the Waterfall methodology, I assure a step by step

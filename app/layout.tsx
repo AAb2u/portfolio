@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
+import Cursor from "./components/Cursor";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -29,6 +30,7 @@ export default function RootLayout({
             if(t==='dark'||(t===null&&d))document.documentElement.classList.add('dark');
           })();
         `}</Script>
+        <Cursor />
         {children}
       </body>
     </html>
