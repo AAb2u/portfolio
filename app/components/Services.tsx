@@ -25,10 +25,10 @@ const services = [
 
 export default function Services() {
   return (
-    <section className="px-32 py-24 flex flex-col gap-16 border-t border-border">
+    <section data-cursor-theme="dark" className="px-32 py-24 flex flex-col gap-16 border-t border-border bg-foreground text-background">
 
       <motion.h2
-        className="text-2xl font-semibold text-foreground"
+        className="text-2xl font-semibold text-background"
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
         viewport={{ once: true }}
@@ -37,11 +37,11 @@ export default function Services() {
         I can help you with ...
       </motion.h2>
 
-      <div className="grid grid-cols-3 divide-x divide-border">
+      <div className="grid grid-cols-3 divide-x divide-background/10">
         {services.map((s, i) => (
           <div key={s.num} className={i === 0 ? "pr-10" : i === services.length - 1 ? "pl-10" : "px-10"}>
             <motion.span
-              className="block text-[72px] font-thin leading-none text-foreground/15 select-none"
+              className="block text-[72px] font-thin leading-none text-background/15 select-none"
               initial={{ y: -20, opacity: 0 }}
               whileInView={{ y: 0, opacity: 1 }}
               viewport={{ once: true }}
@@ -60,14 +60,14 @@ export default function Services() {
                 alt={s.title}
                 className="mt-6 w-56 h-56 object-contain mx-auto block mix-blend-mode-multiply"
                 style={{
-                  filter: "invert(1) contrast(1.8)",
-                  mixBlendMode: "multiply",
+                  filter: "contrast(1.4) brightness(1.1)",
+                  mixBlendMode: "screen",
                   transform: "translateZ(0)",
                   clipPath: (s as any).clip ?? "none",
                 }}
               />
-              <h3 className="mt-4 mb-3 text-sm font-semibold">{s.title}</h3>
-              <p className="text-[13px] leading-[1.85] text-muted">{s.desc}</p>
+              <h3 className="mt-4 mb-3 text-sm font-semibold text-background">{s.title}</h3>
+              <p className="text-[13px] leading-[1.85] text-background/50">{s.desc}</p>
             </motion.div>
           </div>
         ))}

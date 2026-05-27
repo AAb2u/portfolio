@@ -4,7 +4,8 @@ import { useEffect, useRef, useState } from "react";
 type CursorMode = "default" | "hover" | "view";
 
 export default function Cursor() {
-  const dot = useRef<HTMLDivElement>(null);
+  const dotRef = useRef<HTMLDivElement>(null);
+  const ballRef = useRef<HTMLDivElement>(null);
   const pos = useRef({ x: 0, y: 0 });
   const current = useRef({ x: 0, y: 0 });
   const raf = useRef<number>(0);
@@ -31,9 +32,18 @@ export default function Cursor() {
     const loop = () => {
       current.current.x += (pos.current.x - current.current.x) * 0.15;
       current.current.y += (pos.current.y - current.current.y) * 0.15;
-      if (dot.current) {
-        dot.current.style.transform = `translate(${current.current.x}px, ${current.current.y}px)`;
+
+      if (dotRef.current) {
+        dotRef.current.style.transform = `translate(${current.current.x}px, ${current.current.y}px)`;
       }
+
+      if (ballRef.current) {
+        const el = document.elementFromPoint(pos.current.x, pos.current.y);
+        const isDark = !!el?.closest("[data-cursor-theme='dark']");
+        ballRef.current.style.backgroundColor = isDark ? "#ffffff" : "#111111";
+        ballRef.current.style.color = isDark ? "#111111" : "#ffffff";
+      }
+
       raf.current = requestAnimationFrame(loop);
     };
 
@@ -50,20 +60,22 @@ export default function Cursor() {
     };
   }, []);
 
-  const size =
-    mode === "view" ? 88 : mode === "hover" ? 22 : 10;
+  const size = mode === "view" ? 88 : mode === "hover" ? 22 : 10;
 
   return (
     <div
-      ref={dot}
+      ref={dotRef}
       className="fixed top-0 left-0 z-[9999] pointer-events-none -translate-x-1/2 -translate-y-1/2"
     >
       <div
-        className="rounded-full bg-foreground text-background flex items-center justify-center overflow-hidden"
+        ref={ballRef}
+        className="rounded-full flex items-center justify-center overflow-hidden"
         style={{
           width: size,
           height: size,
-          transition: "width 0.4s cubic-bezier(0.34,1,0.64,1), height 0.4s cubic-bezier(0.34,1,0.64,1)",
+          backgroundColor: "#111111",
+          color: "#ffffff",
+          transition: "width 0.4s cubic-bezier(0.34,1,0.64,1), height 0.4s cubic-bezier(0.34,1,0.64,1), background-color 0.5s ease, color 0.5s ease",
         }}
       >
         <span
