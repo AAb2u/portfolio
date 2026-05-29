@@ -44,6 +44,7 @@ export default function Contact() {
                 src="https://media.licdn.com/dms/image/v2/D4E03AQGjMu8_MuzK0w/profile-displayphoto-shrink_400_400/B4EZYQZkQkHYAg-/0/1744031860160?e=1781136000&v=beta&t=Ot5t_aSxyNQbIVf-9KDsPS3lJUiWNnGRGEnyZVY-WsE"
                 alt="Abdenour Akrour"
                 fill
+                sizes="clamp(48px, 5.5vw, 80px)"
                 className="rounded-full object-cover"
               />
               <span style={{ position: "absolute", bottom: 2, right: 2, width: 10, height: 10, background: "#4ade80", borderRadius: "50%", border: `2px solid ${BG}` }} />

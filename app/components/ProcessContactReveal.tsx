@@ -9,7 +9,6 @@ export default function ProcessContactReveal() {
   const contactRef = useRef<HTMLDivElement>(null);
   const [contactH, setContactH] = useState(0);
 
-  // Measure Contact height to pull Process up over it
   useEffect(() => {
     if (!contactRef.current) return;
     const ro = new ResizeObserver(([e]) => setContactH(e.contentRect.height));
@@ -17,36 +16,41 @@ export default function ProcessContactReveal() {
     return () => ro.disconnect();
   }, []);
 
+  // 500vh total:
+  //  0%  → 60%  : Process pinned, steps reveal sequentially
+  //  60% → 100% : Process slides up, Contact reveals behind
   const { scrollYProgress } = useScroll({
     target: wrapperRef,
     offset: ["start start", "end end"],
   });
 
-  // Process slides UP from y:0 to y:-100vh as user scrolls → reveals Contact behind it
-  const processY = useTransform(scrollYProgress, [0, 1], ["0vh", "-100vh"]);
+  const processY = useTransform(scrollYProgress, [0.60, 1], ["0vh", "-100vh"]);
 
   return (
-    // 200vh wrapper gives ~100vh of scroll space for the reveal
-    <div ref={wrapperRef} style={{ position: "relative", minHeight: "200vh", backgroundColor: "#111827" }}>
+    <div ref={wrapperRef} style={{ position: "relative", height: "500vh" }}>
 
-      {/* Contact: sticky → stays pinned while Process slides away */}
+      {/* Contact — sticky behind */}
       <div ref={contactRef} style={{ position: "sticky", top: 0, zIndex: 0 }}>
         <Contact />
       </div>
 
-      {/* Process: pulled up over Contact via negative margin, slides away on scroll */}
+      {/* Process — overlays Contact, pinned at full viewport height, then slides away */}
       <motion.div
         className="bg-background"
         style={{
-          position: "sticky",
-          top: 0,
-          // negative margin pulls Process back up to overlap Contact
-          marginTop: contactH > 0 ? -contactH : 0,
-          zIndex: 10,
-          y: processY,
+          position:  "sticky",
+          top:        0,
+          marginTop:  contactH > 0 ? -contactH : 0,
+          zIndex:     10,
+          y:          processY,
+          height:     "100vh",
+          display:    "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          overflow:   "hidden",
         }}
       >
-        <Process />
+        <Process scrollYProgress={scrollYProgress} />
       </motion.div>
 
     </div>
