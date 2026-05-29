@@ -1,3 +1,6 @@
+"use client";
+import TextReveal from "./TextReveal";
+
 export default function Footer() {
   const links = ["Dribbble", "Behance", "LinkedIn", "Instagram", "Email"];
 
@@ -8,13 +11,13 @@ export default function Footer() {
       <div className="flex gap-6">
         {links.map((l) => (
           <a key={l} href="#" className="hover:text-foreground transition-colors">
-            {l}
+            <TextReveal text={l} duration={600} />
           </a>
         ))}
       </div>
 
       <a href="#" className="hover:text-foreground transition-colors">
-        Back to top ↑
+        <TextReveal text="Back to top ↑" duration={600} />
       </a>
     </footer>
   );

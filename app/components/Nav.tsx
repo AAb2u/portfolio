@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import TextReveal from "./TextReveal";
 
 const links = [
   { label: "About",        href: "#about" },
@@ -79,7 +80,7 @@ export default function Nav() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.4, delay: 0.2 + i * 0.08, ease: "easeOut" }}
                   >
-                    {l.label}
+                    <TextReveal text={l.label} duration={600} />
                   </motion.a>
                 ))}
               </motion.nav>
@@ -172,7 +173,7 @@ export default function Nav() {
                     exit={{ y: "110%" }}
                     transition={{ duration: 0.45, ease: EASE, delay: i * 0.06 }}
                   >
-                    {l.label}
+                    <TextReveal text={l.label} duration={700} />
                   </motion.a>
                 </div>
               ))}

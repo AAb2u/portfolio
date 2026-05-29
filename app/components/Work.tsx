@@ -54,8 +54,20 @@ export default function Work() {
       rawPos.current = { x: e.clientX, y: e.clientY };
     };
 
+    const detectHover = () => {
+      const el = document.elementFromPoint(rawPos.current.x, rawPos.current.y);
+      if (!el) return;
+      const anchor = (el as HTMLElement).closest("[data-project-index]");
+      if (anchor) {
+        const idx = parseInt((anchor as HTMLElement).dataset.projectIndex ?? "-1");
+        lerpPos.current = { ...rawPos.current };
+        setHoveredIndex(idx);
+      } else {
+        setHoveredIndex(null);
+      }
+    };
+
     const loop = () => {
-      // Lerp factor 0.083 ≈ 1/12, creates ~12-frame inertia like the reference site
       lerpPos.current.x += (rawPos.current.x - lerpPos.current.x) * 0.083;
       lerpPos.current.y += (rawPos.current.y - lerpPos.current.y) * 0.083;
       if (imageWrapRef.current) {
@@ -66,10 +78,12 @@ export default function Work() {
     };
 
     window.addEventListener("mousemove", onMove);
+    window.addEventListener("scroll", detectHover, { passive: true });
     rafRef.current = requestAnimationFrame(loop);
 
     return () => {
       window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("scroll", detectHover);
       cancelAnimationFrame(rafRef.current);
     };
   }, []);
@@ -77,7 +91,7 @@ export default function Work() {
   const isAnyHovered = hoveredIndex !== null;
 
   return (
-    <section id="work" className="px-24 py-28 flex flex-col gap-8 border-t border-border">
+    <section id="work" className="px-24 py-28 flex flex-col gap-8 border-t border-border" onMouseLeave={() => setHoveredIndex(null)}>
 
       <motion.div
         className="flex justify-between items-baseline"
@@ -93,7 +107,7 @@ export default function Work() {
       </motion.div>
 
       {/* Project list */}
-      <div onMouseLeave={() => setHoveredIndex(null)}>
+      <div>
         <div className="h-px w-full bg-border" />
 
         {projects.map((p, i) => (
@@ -111,10 +125,12 @@ export default function Work() {
               rel="noopener noreferrer"
               className="flex items-center justify-between py-12 px-16"
               data-cursor="view"
+              data-project-index={i}
               onMouseEnter={() => {
                 lerpPos.current = { ...rawPos.current };
                 setHoveredIndex(i);
               }}
+              onMouseLeave={() => setHoveredIndex(null)}
               style={{
                 opacity: isAnyHovered && hoveredIndex !== i ? 0.35 : 1,
                 transition: `opacity 0.3s ${HOVER_BZ}`,
@@ -123,6 +139,11 @@ export default function Work() {
               {/* Left: project name */}
               <h3
                 className="text-[clamp(48px,5.5vw,80px)] font-normal tracking-tight leading-none"
+                style={{
+                  scale: hoveredIndex === i ? 1.08 : 1,
+                  transformOrigin: "left center",
+                  transition: `scale 0.4s ${HOVER_BZ}`,
+                }}
               >
                 {p.name}
               </h3>
@@ -152,7 +173,7 @@ export default function Work() {
           rel="noopener noreferrer"
           className="inline-flex items-center gap-2 bg-foreground text-background text-sm font-medium px-6 py-3 rounded-full hover:opacity-80 transition-opacity"
         >
-          More Work
+          <TextReveal text="More Work" />
           <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
             <path d="M2 10L10 2M10 2H4M10 2v6" />
           </svg>

@@ -1,6 +1,7 @@
 "use client";
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import TextReveal from "./TextReveal";
 
 const BG    = "#111827";
 const FG    = "#E9E9E3";
@@ -152,7 +153,7 @@ export default function Contact() {
                   onMouseEnter={e => (e.currentTarget.style.color = FG)}
                   onMouseLeave={e => (e.currentTarget.style.color = MUTED)}
                 >
-                  {s.label}
+                  <TextReveal text={s.label} duration={600} />
                 </a>
               ))}
             </div>
@@ -162,7 +163,7 @@ export default function Contact() {
               onMouseEnter={e => (e.currentTarget.style.color = FG)}
               onMouseLeave={e => (e.currentTarget.style.color = MUTED)}
             >
-              Back to top ↑
+              <TextReveal text="Back to top ↑" duration={600} />
             </a>
           </div>
 
