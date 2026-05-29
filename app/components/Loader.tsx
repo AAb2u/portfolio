@@ -9,27 +9,51 @@ export default function Loader() {
   useEffect(() => {
     document.body.style.overflow = "hidden";
 
+    const ASSETS = [
+      "/gif/web-dark.gif",
+      "/gif/software-dark.gif",
+      "/gif/uiux-dark.gif",
+      "/projects/EasySave.png",
+      "/projects/portfolio.png",
+    ];
+
+    const preload = (src: string) =>
+      new Promise<void>((resolve) => {
+        const img = new window.Image();
+        img.onload = () => resolve();
+        img.onerror = () => resolve();
+        img.src = src;
+      });
+
     const duration = 2500;
     const start = performance.now();
+    let rafId: number;
 
-    const tick = (now: number) => {
-      const elapsed = now - start;
-      const p = Math.min(Math.round((elapsed / duration) * 100), 100);
-      setProgress(p);
+    const timerDone = new Promise<void>((resolve) => {
+      const tick = (now: number) => {
+        const elapsed = now - start;
+        const p = Math.min(Math.round((elapsed / duration) * 100), 100);
+        setProgress(p);
+        if (elapsed < duration) {
+          rafId = requestAnimationFrame(tick);
+        } else {
+          resolve();
+        }
+      };
+      rafId = requestAnimationFrame(tick);
+    });
 
-      if (elapsed < duration) {
-        requestAnimationFrame(tick);
-      } else {
-        setTimeout(() => {
-          setVisible(false);
-          document.body.style.overflow = "";
-        }, 300);
-      }
-    };
+    const assetsDone = Promise.all(ASSETS.map(preload));
 
-    const raf = requestAnimationFrame(tick);
+    Promise.all([timerDone, assetsDone]).then(() => {
+      setTimeout(() => {
+        setVisible(false);
+        document.body.style.overflow = "";
+      }, 300);
+    });
+
     return () => {
-      cancelAnimationFrame(raf);
+      cancelAnimationFrame(rafId);
       document.body.style.overflow = "";
     };
   }, []);

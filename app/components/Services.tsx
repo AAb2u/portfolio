@@ -6,20 +6,20 @@ const services = [
     num: "01",
     title: "Web Development",
     desc: "Building performant web applications with React, Next.js and Node.js — from idea to production.",
-    gif: "/gif/web.gif",
+    gif: "/gif/web-dark.gif",
   },
   {
     num: "02",
     title: "Software Engineering",
     desc: "Architecting clean, structured software with C#, C++, Java and .NET using OOP and MVVM patterns.",
-    gif: "/gif/software.gif",
+    gif: "/gif/software-dark.gif",
     clip: "inset(0 0 12% 0)",
   },
   {
     num: "03",
     title: "UI / UX Design",
     desc: "Designing intuitive interfaces and seamless user experiences that look great and convert.",
-    gif: "/gif/uiux.gif",
+    gif: "/gif/uiux-dark.gif",
   },
 ];
 
@@ -58,9 +58,8 @@ export default function Services() {
               <img
                 src={s.gif}
                 alt={s.title}
-                className="mt-6 w-56 h-56 object-contain mx-auto block mix-blend-mode-multiply"
+                className="mt-6 w-56 h-56 object-contain mx-auto block"
                 style={{
-                  filter: "contrast(1.4) brightness(1.1)",
                   mixBlendMode: "screen",
                   transform: "translateZ(0)",
                   clipPath: (s as any).clip ?? "none",

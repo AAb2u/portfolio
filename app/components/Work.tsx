@@ -123,7 +123,7 @@ export default function Work() {
               href={p.href}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-between py-12 px-16"
+              className="relative flex items-center justify-between py-10 px-16"
               data-cursor="view"
               data-project-index={i}
               onMouseEnter={() => {
@@ -132,26 +132,74 @@ export default function Work() {
               }}
               onMouseLeave={() => setHoveredIndex(null)}
               style={{
-                opacity: isAnyHovered && hoveredIndex !== i ? 0.35 : 1,
-                transition: `opacity 0.3s ${HOVER_BZ}`,
+                opacity: isAnyHovered && hoveredIndex !== i ? 0.2 : 1,
+                transition: `opacity 0.4s ${HOVER_BZ}`,
               }}
             >
-              {/* Left: project name */}
-              <h3
-                className="text-[clamp(48px,5.5vw,80px)] font-normal tracking-tight leading-none"
+              {/* Left accent bar */}
+              <div
                 style={{
-                  scale: hoveredIndex === i ? 1.08 : 1,
-                  transformOrigin: "left center",
-                  transition: `scale 0.4s ${HOVER_BZ}`,
+                  position: "absolute",
+                  left: 0,
+                  top: "50%",
+                  height: "55%",
+                  width: "2px",
+                  background: "currentColor",
+                  transform: `translateY(-50%) scaleY(${hoveredIndex === i ? 1 : 0})`,
+                  transformOrigin: "center",
+                  transition: `transform 0.45s ${HOVER_BZ}`,
                 }}
-              >
-                {p.name}
-              </h3>
+              />
 
-              {/* Right: tags */}
-              <span className="text-sm text-foreground/70 tracking-wide">
-                {p.tags}
-              </span>
+              {/* Left: name + desc */}
+              <div className="flex flex-col gap-1.5">
+                <h3
+                  className="text-[clamp(48px,5.5vw,80px)] font-normal leading-none"
+                  style={{
+                    scale: hoveredIndex === i ? 1.09 : isAnyHovered ? 0.88 : 1,
+                    transformOrigin: "left center",
+                    letterSpacing: hoveredIndex === i ? "-0.045em" : "-0.02em",
+                    transition: `scale 0.45s ${HOVER_BZ}, letter-spacing 0.45s ${HOVER_BZ}`,
+                  }}
+                >
+                  {p.name}
+                </h3>
+                <span
+                  className="text-sm text-foreground/50"
+                  style={{
+                    opacity: hoveredIndex === i ? 1 : 0,
+                    transform: `translateY(${hoveredIndex === i ? 0 : -8}px)`,
+                    transition: `opacity 0.3s ease, transform 0.3s ease`,
+                    pointerEvents: "none",
+                  }}
+                >
+                  {p.desc}
+                </span>
+              </div>
+
+              {/* Right: tags + year */}
+              <div className="flex flex-col items-end gap-1.5 shrink-0">
+                <span
+                  className="text-sm text-foreground/70 tracking-wide"
+                  style={{
+                    transform: `translateY(${hoveredIndex === i ? -4 : 0}px)`,
+                    transition: `transform 0.35s ${HOVER_BZ}`,
+                  }}
+                >
+                  {p.tags}
+                </span>
+                <span
+                  className="text-[11px] text-foreground/35 tracking-[0.18em] uppercase"
+                  style={{
+                    opacity: hoveredIndex === i ? 1 : 0,
+                    transform: `translateY(${hoveredIndex === i ? 0 : 6}px)`,
+                    transition: `opacity 0.3s ease 0.06s, transform 0.3s ease 0.06s`,
+                    pointerEvents: "none",
+                  }}
+                >
+                  {p.year}
+                </span>
+              </div>
             </a>
             </motion.div>
             <div className="h-px w-full bg-border" />

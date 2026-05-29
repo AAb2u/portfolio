@@ -23,6 +23,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${inter.variable} h-full antialiased`} suppressHydrationWarning>
+      <head>
+        <link rel="preload" href="/gif/web-dark.gif" as="image" type="image/gif" />
+        <link rel="preload" href="/gif/software-dark.gif" as="image" type="image/gif" />
+        <link rel="preload" href="/gif/uiux-dark.gif" as="image" type="image/gif" />
+        <link rel="preload" href="/projects/EasySave.png" as="image" />
+        <link rel="preload" href="/projects/portfolio.png" as="image" />
+      </head>
       <body className="min-h-full flex flex-col bg-background text-foreground">
         <Script id="theme-init" strategy="beforeInteractive">{`
           (function(){
