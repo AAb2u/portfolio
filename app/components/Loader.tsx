@@ -9,7 +9,7 @@ export default function Loader() {
   useEffect(() => {
     document.body.style.overflow = "hidden";
 
-    const duration = 5000;
+    const duration = 2500;
     const start = performance.now();
 
     const tick = (now: number) => {
