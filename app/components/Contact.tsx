@@ -3,7 +3,7 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import TextReveal from "./TextReveal";
 
-const BG    = "#111827";
+const BG    = "#000000";
 const FG    = "#E9E9E3";
 const MUTED = "rgba(233,233,227,0.4)";
 const BORDER = "rgba(233,233,227,0.1)";
