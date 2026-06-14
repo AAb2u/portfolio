@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useSyncExternalStore } from "react";
 import { motion, AnimatePresence, useMotionValue, useSpring } from "framer-motion";
 import TextReveal from "./TextReveal";
 
@@ -11,12 +11,24 @@ const links = [
 ];
 
 const EASE = [0.76, 0, 0.24, 1] as const;
+const MOBILE_QUERY = "(max-width: 767px)";
+
+function subscribeToMobileNav(onStoreChange: () => void) {
+  if (typeof window === "undefined") return () => {};
+  const query = window.matchMedia(MOBILE_QUERY);
+  query.addEventListener("change", onStoreChange);
+  return () => query.removeEventListener("change", onStoreChange);
+}
+
+function getMobileNavSnapshot() {
+  return typeof window !== "undefined" && window.matchMedia(MOBILE_QUERY).matches;
+}
 
 export default function Nav() {
   const [scrolled, setScrolled]           = useState(false);
-  const [onDark, setOnDark]               = useState(false);
   const [open, setOpen]                   = useState(false);
   const [burgerHovered, setBurgerHovered] = useState(false);
+  const mobileNav                         = useSyncExternalStore(subscribeToMobileNav, getMobileNavSnapshot, () => false);
 
   /* ── Magnetic spring ── */
   const magnetX = useMotionValue(0);
@@ -26,13 +38,8 @@ export default function Nav() {
   const zoneRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const contact = document.getElementById("contact");
     const onScroll = () => {
       setScrolled(window.scrollY > 60);
-      if (contact) {
-        // true only when the dark section's top edge reaches the navbar (~64px)
-        setOnDark(contact.getBoundingClientRect().top < 64);
-      }
     };
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
@@ -72,16 +79,13 @@ export default function Nav() {
   return (
     <>
       <motion.header
-        className="fixed top-0 left-0 right-0 z-[60] flex items-center justify-between px-12 md:px-24 py-5"
+        className="fixed top-0 left-0 right-0 z-[60] flex w-screen items-center justify-between px-5 py-5 text-white sm:px-8 md:px-24"
+        style={{ mixBlendMode: "difference" }}
         initial={{ y: -30, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.5, delay: 0.1, ease: [0.25, 0.1, 0.25, 1] }}
       >
-        <motion.span
-          className="text-sm font-medium"
-          animate={{ color: onDark ? "#E9E9E3" : "#111111" }}
-          transition={{ duration: 0.4 }}
-        >
+        <motion.span className="text-sm font-medium">
           Abdenour Akrour
         </motion.span>
 
@@ -89,7 +93,7 @@ export default function Nav() {
 
           {/* Nav links — crossfade out on scroll */}
           <motion.nav
-            className="flex items-center gap-8"
+            className="hidden items-center gap-8 md:flex"
             animate={{ opacity: scrolled ? 0 : 1, y: scrolled ? -6 : 0 }}
             transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
             style={{ pointerEvents: scrolled ? "none" : "auto" }}
@@ -123,7 +127,7 @@ export default function Nav() {
               alignItems: "center",
               justifyContent: "flex-end",
               cursor: "pointer",
-              pointerEvents: scrolled ? "auto" : "none",
+              pointerEvents: scrolled || mobileNav ? "auto" : "none",
             }}
           >
             <motion.div
@@ -138,12 +142,15 @@ export default function Nav() {
                 height: 40,
                 gap: 7,
               }}
-              animate={{ opacity: scrolled ? 1 : 0, scale: scrolled ? 1 : 0.8 }}
+              animate={{
+                opacity: scrolled || mobileNav ? 1 : 0,
+                scale: scrolled || mobileNav ? 1 : 0.8,
+              }}
               transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
               whileTap={{ scale: 0.88 }}
             >
               <motion.span
-                style={{ display: "block", height: 1.5, borderRadius: 2, backgroundColor: onDark ? "#E9E9E3" : "#111111" }}
+                style={{ display: "block", height: 1.5, borderRadius: 2, backgroundColor: "currentColor" }}
                 animate={
                   open            ? { width: 22, rotate: 45,  y: 4.25 }
                   : burgerHovered ? { width: 32, rotate: 0,   y: 0    }
@@ -152,7 +159,7 @@ export default function Nav() {
                 transition={{ duration: 0.35, ease: EASE }}
               />
               <motion.span
-                style={{ display: "block", height: 1.5, borderRadius: 2, backgroundColor: onDark ? "#E9E9E3" : "#111111" }}
+                style={{ display: "block", height: 1.5, borderRadius: 2, backgroundColor: "currentColor" }}
                 animate={
                   open            ? { width: 22, rotate: -45, y: -4.25 }
                   : burgerHovered ? { width: 22, rotate: 0,   y: 0     }
