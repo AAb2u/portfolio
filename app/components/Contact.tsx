@@ -1,5 +1,4 @@
 "use client";
-import Image from "next/image";
 import { useEffect, useState } from "react";
 import TextReveal from "./TextReveal";
 
@@ -7,6 +6,8 @@ const BG    = "#000000";
 const FG    = "#E9E9E3";
 const MUTED = "rgba(233,233,227,0.4)";
 const BORDER = "rgba(233,233,227,0.1)";
+const LINKEDIN_PROFILE_IMAGE =
+  "https://media.licdn.com/dms/image/v2/D4E03AQGjMu8_MuzK0w/profile-displayphoto-shrink_400_400/B4EZYQZkQkHYAg-/0/1744031860160?e=1782950400&v=beta&t=8JherjwnF5ZJqy899H5pnkoT6T6bjOYtRnzSon5dSGg";
 
 export default function Contact() {
   const [time, setTime] = useState("");
@@ -40,12 +41,11 @@ export default function Contact() {
           <div style={{ display: "flex", alignItems: "center", gap: "clamp(16px, 2vw, 32px)" }}>
             {/* Avatar */}
             <div style={{ position: "relative", flexShrink: 0, width: "clamp(48px, 5.5vw, 80px)", height: "clamp(48px, 5.5vw, 80px)" }}>
-              <Image
-                src="https://media.licdn.com/dms/image/v2/D4E03AQGjMu8_MuzK0w/profile-displayphoto-shrink_400_400/B4EZYQZkQkHYAg-/0/1744031860160?e=1781136000&v=beta&t=Ot5t_aSxyNQbIVf-9KDsPS3lJUiWNnGRGEnyZVY-WsE"
+              <img
+                src={LINKEDIN_PROFILE_IMAGE}
                 alt="Abdenour Akrour"
-                fill
-                sizes="clamp(48px, 5.5vw, 80px)"
                 className="rounded-full object-cover"
+                style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}
               />
               <span style={{ position: "absolute", bottom: 2, right: 2, width: 10, height: 10, background: "#4ade80", borderRadius: "50%", border: `2px solid ${BG}` }} />
             </div>
