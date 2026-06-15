@@ -27,7 +27,7 @@ export default function ProcessContactReveal() {
   const processY = useTransform(scrollYProgress, [0.60, 1], ["0vh", "-100vh"]);
 
   return (
-    <div ref={wrapperRef} style={{ position: "relative", height: "500vh" }}>
+    <div ref={wrapperRef} style={{ position: "relative", height: "500vh", backgroundColor: "#eeeeeb" }}>
 
       {/* Contact — sticky behind */}
       <div ref={contactRef} style={{ position: "sticky", top: 0, zIndex: 0 }}>
@@ -36,7 +36,6 @@ export default function ProcessContactReveal() {
 
       {/* Process — overlays Contact, pinned at full viewport height, then slides away */}
       <motion.div
-        className="bg-background"
         style={{
           position:  "sticky",
           top:        0,
@@ -44,6 +43,7 @@ export default function ProcessContactReveal() {
           zIndex:     10,
           y:          processY,
           height:     "100vh",
+          backgroundColor: "#eeeeeb",
           display:    "flex",
           flexDirection: "column",
           justifyContent: "center",

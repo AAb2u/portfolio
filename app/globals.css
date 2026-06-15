@@ -11,7 +11,7 @@
 
 html {
   overscroll-behavior: none;
-  background: #111827; /* matches last section — prevents white flash on overscroll */
+  background: #111111;
 }
 
 body {

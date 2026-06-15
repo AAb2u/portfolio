@@ -10,9 +10,9 @@ export default function Loader() {
     document.body.style.overflow = "hidden";
 
     const ASSETS = [
-      "/gif/web-dark.gif",
-      "/gif/software-dark.gif",
-      "/gif/uiux-dark.gif",
+      "/gif/web-111.gif",
+      "/gif/software-111.gif",
+      "/gif/uiux-111.gif",
       "/projects/EasySave.png",
       "/projects/portfolio.png",
     ];

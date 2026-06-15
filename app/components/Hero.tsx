@@ -10,6 +10,44 @@ const socials = [
 
 const introEase = [0.16, 1, 0.3, 1] as const;
 
+const ResumeIcon = () => (
+  <svg
+    aria-hidden="true"
+    width="15"
+    height="15"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.7"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7z" />
+    <path d="M14 2v5h5" />
+    <path d="M9 13h6" />
+    <path d="M9 17h4" />
+  </svg>
+);
+
+const ChatIcon = () => (
+  <svg
+    aria-hidden="true"
+    width="15"
+    height="15"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.7"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M21 12a8 8 0 0 1-8 8H8l-5 3 1.7-5A8 8 0 1 1 21 12z" />
+    <path d="M8 12h.01" />
+    <path d="M12 12h.01" />
+    <path d="M16 12h.01" />
+  </svg>
+);
+
 export default function Hero() {
   return (
     <section className="relative min-h-screen overflow-hidden bg-[#eeeeeb] text-[#252525]">
@@ -68,15 +106,19 @@ export default function Hero() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.65, delay: 0.68, ease: introEase }}
         >
-          <a className="group inline-flex w-fit items-center gap-3" href="mailto:akrourabdenour9@gmail.com?subject=Resume%20request">
-            <span className="grid h-7 w-7 place-items-center border border-[#a8a8a3] text-[15px] transition-colors group-hover:border-[#1677ff] group-hover:text-[#1677ff]">
-              CV
+          <a
+            className="group inline-flex w-fit items-center gap-3"
+            href="/cv/cv%20(1).pdf"
+            download="Abdenour-Akrour-CV.pdf"
+          >
+            <span className="grid h-7 w-7 place-items-center border border-[#a8a8a3] transition-colors group-hover:border-[#1677ff] group-hover:text-[#1677ff]">
+              <ResumeIcon />
             </span>
             <span>If you want my resume <span className="text-[#1677ff]">**</span></span>
           </a>
           <a className="group inline-flex w-fit items-center gap-3" href="#contact">
-            <span className="grid h-7 w-7 place-items-center border border-[#a8a8a3] text-[16px] transition-colors group-hover:border-[#1677ff] group-hover:text-[#1677ff]">
-              @
+            <span className="grid h-7 w-7 place-items-center border border-[#a8a8a3] transition-colors group-hover:border-[#1677ff] group-hover:text-[#1677ff]">
+              <ChatIcon />
             </span>
             <span>Or have chat</span>
           </a>

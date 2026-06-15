@@ -36,6 +36,7 @@ export default function Process({ scrollYProgress }: { scrollYProgress: MotionVa
   // Ligne horizontale : [0.02 → 0.46] = scaleX 0→1
   // À scaleX=0.25 → step1 (scrollY≈0.13), scaleX=0.50 → step2 (≈0.24), scaleX=0.75 → step3 (≈0.35)
   const hLineScaleX = useTransform(scrollYProgress, [0.02, 0.46], [0, 1]);
+  const mobileLineScaleY = useTransform(scrollYProgress, [0.02, 0.46], [0, 1]);
 
   // Icons — pop quand la ligne les atteint
   const s0i = useTransform(scrollYProgress, [0.020, 0.040], [0, 1]);
@@ -70,19 +71,40 @@ export default function Process({ scrollYProgress }: { scrollYProgress: MotionVa
   return (
     <section
       id="process"
-      className="w-full px-24 border-t border-border"
-      style={{ paddingTop: "clamp(32px, 4vh, 56px)", paddingBottom: "clamp(32px, 4vh, 56px)" }}
+      className="relative flex h-full min-h-screen w-full flex-col justify-center overflow-hidden border-t border-[#111111]/15 bg-[#eeeeeb] px-6 sm:px-24"
+      style={{ paddingTop: "clamp(24px, 4vh, 56px)", paddingBottom: "clamp(24px, 4vh, 56px)" }}
     >
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 hidden sm:grid"
+        style={{
+          gridTemplateColumns: "minmax(54px,0.55fr) minmax(0,2.2fr) minmax(0,1.35fr) minmax(112px,0.78fr)",
+        }}
+      >
+        {Array.from({ length: 4 }).map((_, index) => (
+          <span key={index} className="border-r border-[#111111]/12 last:border-r-0" />
+        ))}
+      </div>
+
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 grid grid-cols-[28px_1fr_28px] sm:hidden"
+      >
+        {Array.from({ length: 3 }).map((_, index) => (
+          <span key={index} className="border-r border-[#111111]/12 last:border-r-0" />
+        ))}
+      </div>
+
       {/* Header */}
-      <div className="flex justify-between items-end" style={{ marginBottom: "clamp(24px, 3vh, 48px)" }}>
-        <h2 className="text-[clamp(28px,3.5vw,52px)] font-light tracking-tight leading-[1.05]">
+      <div className="relative z-10 flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-end" style={{ marginBottom: "clamp(18px, 3vh, 48px)" }}>
+        <h2 className="text-[clamp(34px,9vw,52px)] font-light tracking-tight leading-[1.05]">
           My way of<br />getting things done.
         </h2>
         <span className="text-[11px] text-muted uppercase tracking-[0.18em] pb-1">Process</span>
       </div>
 
       {/* Steps + timeline */}
-      <div className="relative">
+      <div className="relative z-10 hidden sm:block">
 
         {/* Vertical lines */}
         {steps.map((s, i) => (
@@ -149,7 +171,7 @@ export default function Process({ scrollYProgress }: { scrollYProgress: MotionVa
                 height:       40,
                 borderRadius: "50%",
                 border:       "1px solid #111111",
-                background:   "var(--color-background)",
+                background:   "#eeeeeb",
                 zIndex:       10,
                 scale:        anims[i].i,
               }}
@@ -158,6 +180,51 @@ export default function Process({ scrollYProgress }: { scrollYProgress: MotionVa
             </motion.div>
           ))}
         </div>
+      </div>
+
+      <div className="relative z-10 grid gap-3 sm:hidden">
+        <div className="pointer-events-none absolute left-[18px] top-[18px] bottom-[18px] w-px bg-[#111111]/15" />
+        <motion.div
+          className="pointer-events-none absolute left-[18px] top-[18px] bottom-[18px] w-px bg-[#111111]"
+          style={{ scaleY: mobileLineScaleY, transformOrigin: "top" }}
+        />
+
+        {steps.map((step, index) => (
+          <article
+            key={step.title}
+            className="relative grid grid-cols-[38px_1fr] gap-3 border-t border-[#111111]/15 py-3"
+          >
+            <div className="relative flex justify-center">
+              <motion.span
+                className="relative z-10 flex h-9 w-9 items-center justify-center rounded-full border border-[#111111] bg-[#eeeeeb] text-muted"
+                style={{ scale: anims[index].i }}
+              >
+                {step.icon}
+              </motion.span>
+            </div>
+
+            <motion.div
+              className="min-w-0"
+              style={{ y: anims[index].y, opacity: anims[index].o }}
+            >
+              <div className="flex items-baseline justify-between gap-3">
+                <h3 className="text-[15px] font-medium leading-tight">{step.title}</h3>
+                <span className="shrink-0 text-[10px] text-muted">{step.duration}</span>
+              </div>
+              <p
+                className="mt-2 text-[12px] leading-[1.45] text-muted"
+                style={{
+                  display: "-webkit-box",
+                  WebkitLineClamp: 2,
+                  WebkitBoxOrient: "vertical",
+                  overflow: "hidden",
+                }}
+              >
+                {step.desc}
+              </p>
+            </motion.div>
+          </article>
+        ))}
       </div>
     </section>
   );

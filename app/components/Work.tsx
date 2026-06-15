@@ -91,10 +91,38 @@ export default function Work() {
   const isAnyHovered = hoveredIndex !== null;
 
   return (
-    <section id="work" className="px-24 py-28 flex flex-col gap-8 border-t border-border" onMouseLeave={() => setHoveredIndex(null)}>
+    <section
+      id="work"
+      className="relative flex flex-col gap-8 overflow-hidden border-t border-[#111111]/15 bg-[#eeeeeb] px-8 py-24 text-[#252525] sm:px-24 sm:py-28"
+      onMouseLeave={() => setHoveredIndex(null)}
+    >
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 hidden sm:grid"
+        style={{
+          gridTemplateColumns: "minmax(54px,0.55fr) minmax(0,2.2fr) minmax(0,1.35fr) minmax(112px,0.78fr)",
+          gridTemplateRows: `180px repeat(${projects.length}, minmax(118px, 1fr)) 120px`,
+        }}
+      >
+        {Array.from({ length: (projects.length + 2) * 4 }).map((_, index) => (
+          <span key={index} className="border-r border-[#111111]/12 last:border-r-0" />
+        ))}
+      </div>
+
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 grid grid-cols-[28px_1fr_28px] sm:hidden"
+        style={{
+          gridTemplateRows: `140px repeat(${projects.length}, minmax(124px, 1fr)) 96px`,
+        }}
+      >
+        {Array.from({ length: (projects.length + 2) * 3 }).map((_, index) => (
+          <span key={index} className="border-r border-[#111111]/12 last:border-r-0" />
+        ))}
+      </div>
 
       <motion.div
-        className="flex justify-between items-baseline"
+        className="relative z-10 flex items-baseline justify-between"
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
@@ -107,8 +135,8 @@ export default function Work() {
       </motion.div>
 
       {/* Project list */}
-      <div>
-        <div className="h-px w-full bg-border" />
+      <div className="relative z-10">
+        <div className="h-px w-full bg-[#111111]/15" />
 
         {projects.map((p, i) => (
           <div key={p.name}>
@@ -123,7 +151,7 @@ export default function Work() {
               href={p.href}
               target="_blank"
               rel="noopener noreferrer"
-              className="relative flex items-center justify-between py-10 px-16"
+              className="relative block min-h-[210px] px-0 py-10 sm:min-h-[180px] sm:px-16"
               data-cursor="view"
               data-project-index={i}
               onMouseEnter={() => {
@@ -152,12 +180,12 @@ export default function Work() {
               />
 
               {/* Left: name + desc */}
-              <div className="flex flex-col gap-1.5">
+              <div className="absolute inset-0 flex min-w-0 flex-col items-center justify-center gap-1.5 px-4 text-center sm:px-40">
                 <h3
-                  className="text-[clamp(48px,5.5vw,80px)] font-normal leading-none"
+                  className="max-w-full text-[clamp(48px,5.5vw,80px)] font-normal leading-none"
                   style={{
                     scale: hoveredIndex === i ? 1.09 : isAnyHovered ? 0.88 : 1,
-                    transformOrigin: "left center",
+                    transformOrigin: "center",
                     letterSpacing: hoveredIndex === i ? "-0.045em" : "-0.02em",
                     transition: `scale 0.45s ${HOVER_BZ}, letter-spacing 0.45s ${HOVER_BZ}`,
                   }}
@@ -178,7 +206,7 @@ export default function Work() {
               </div>
 
               {/* Right: tags + year */}
-              <div className="flex flex-col items-end gap-1.5 shrink-0">
+              <div className="absolute bottom-6 left-0 right-0 flex min-w-0 flex-col items-center gap-1.5 px-4 text-center sm:bottom-auto sm:left-auto sm:right-16 sm:top-1/2 sm:max-w-[260px] sm:-translate-y-1/2 sm:items-end sm:text-right">
                 <span
                   className="text-sm text-foreground/70 tracking-wide"
                   style={{
@@ -202,14 +230,14 @@ export default function Work() {
               </div>
             </a>
             </motion.div>
-            <div className="h-px w-full bg-border" />
+            <div className="h-px w-full bg-[#111111]/15" />
           </div>
         ))}
       </div>
 
       {/* Footer */}
       <motion.div
-        className="flex justify-center pt-2"
+        className="relative z-10 flex justify-center pt-2"
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
