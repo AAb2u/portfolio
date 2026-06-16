@@ -16,6 +16,7 @@ function formatTime() {
     minute: "2-digit",
     second: "2-digit",
     hour12: false,
+    timeZone: "Africa/Algiers",
   });
 }
 
@@ -23,8 +24,12 @@ export default function Contact() {
   const [time, setTime] = useState("");
 
   useEffect(() => {
+    const frame = requestAnimationFrame(() => setTime(formatTime()));
     const id = setInterval(() => setTime(formatTime()), 1000);
-    return () => clearInterval(id);
+    return () => {
+      cancelAnimationFrame(frame);
+      clearInterval(id);
+    };
   }, []);
 
   const socials = [
@@ -63,10 +68,11 @@ export default function Contact() {
           <div className="h-px flex-1" style={{ backgroundColor: BORDER }} />
           <a
             href="mailto:akrourabdenour9@gmail.com"
-            className="ml-4 inline-flex h-16 w-16 shrink-0 items-center justify-center rounded-full text-center text-[11px] font-semibold transition-transform hover:scale-105 sm:absolute sm:right-0 sm:ml-0 sm:h-[clamp(120px,10vw,160px)] sm:w-[clamp(120px,10vw,160px)] sm:text-[13px]"
+            aria-label="Send an email to Abdenour Akrour"
+            className="ml-4 inline-flex h-16 w-16 shrink-0 items-center justify-center rounded-full text-center text-[11px] font-semibold leading-tight transition-transform hover:scale-105 focus-visible:scale-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#E9E9E3] sm:absolute sm:right-0 sm:ml-0 sm:h-[clamp(120px,10vw,160px)] sm:w-[clamp(120px,10vw,160px)] sm:text-[13px]"
             style={{ backgroundColor: FG, color: BG }}
           >
-            Get in touch
+            Let&apos;s talk
           </a>
         </div>
 
@@ -74,13 +80,13 @@ export default function Contact() {
           {[
             { text: "akrourabdenour9@gmail.com", href: "mailto:akrourabdenour9@gmail.com", external: false },
             { text: "github.com/AAb2u", href: "https://github.com/AAb2u", external: true },
+            { text: "linkedin.com/in/akrour-abdenour", href: "https://www.linkedin.com/in/akrour-abdenour-08a10235b", external: true },
           ].map(({ text, href, external }) => (
             <a
               key={text}
               href={href}
               {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-              className="inline-flex min-w-0 items-center justify-center rounded-full border px-4 py-2.5 text-center text-[12px] transition-colors sm:w-fit sm:px-5 sm:text-[13px]"
-              style={{ borderColor: BORDER, color: MUTED }}
+              className="inline-flex min-w-0 items-center justify-center rounded-full border border-[rgba(233,233,227,0.12)] px-4 py-2.5 text-center text-[12px] text-[rgba(233,233,227,0.56)] transition-colors hover:border-[rgba(233,233,227,0.32)] hover:text-[#E9E9E3] focus-visible:border-[rgba(233,233,227,0.45)] focus-visible:text-[#E9E9E3] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[rgba(233,233,227,0.35)] sm:w-fit sm:px-5 sm:text-[13px]"
             >
               <span className="truncate">{text}</span>
             </a>
@@ -119,14 +125,16 @@ export default function Contact() {
                     href={social.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="transition-colors hover:text-[#E9E9E3]"
-                    style={{ color: MUTED }}
+                    className="text-[rgba(233,233,227,0.45)] transition-colors hover:text-[#E9E9E3] focus-visible:text-[#E9E9E3] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[rgba(233,233,227,0.35)]"
                   >
                     <TextReveal text={social.label} duration={600} />
                   </a>
                 ))}
               </div>
-              <a className="transition-colors hover:text-[#E9E9E3]" href="#" style={{ color: MUTED }}>
+              <a
+                className="w-fit text-[rgba(233,233,227,0.45)] transition-colors hover:text-[#E9E9E3] focus-visible:text-[#E9E9E3] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[rgba(233,233,227,0.35)] lg:self-end"
+                href="#"
+              >
                 <TextReveal text="Back to top" duration={600} />
               </a>
             </div>

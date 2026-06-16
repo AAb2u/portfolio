@@ -1,7 +1,6 @@
 "use client";
 import { useState, useEffect, useRef, useSyncExternalStore } from "react";
 import { motion, AnimatePresence, useMotionValue, useSpring } from "framer-motion";
-import TextReveal from "./TextReveal";
 
 const links = [
   { label: "About",          href: "#about" },
@@ -12,6 +11,35 @@ const links = [
 
 const EASE = [0.76, 0, 0.24, 1] as const;
 const MOBILE_QUERY = "(max-width: 767px)";
+const MORPH_DISTANCE = 34;
+
+const navVariants = {
+  visible: {
+    transition: { staggerChildren: 0.06, delayChildren: 0.18 },
+  },
+  compact: {
+    transition: { staggerChildren: 0.035, staggerDirection: -1 },
+  },
+};
+
+const navLinkVariants = {
+  visible: {
+    opacity: 1,
+    x: 0,
+    y: 0,
+    scaleX: 1,
+    filter: "blur(0px)",
+    transition: { duration: 0.46, ease: EASE },
+  },
+  compact: (index: number) => ({
+    opacity: 0,
+    x: MORPH_DISTANCE * (links.length - index),
+    y: index % 2 === 0 ? -1 : 1,
+    scaleX: 0.06,
+    filter: "blur(5px)",
+    transition: { duration: 0.46, ease: EASE },
+  }),
+};
 
 function subscribeToMobileNav(onStoreChange: () => void) {
   if (typeof window === "undefined") return () => {};
@@ -24,9 +52,58 @@ function getMobileNavSnapshot() {
   return typeof window !== "undefined" && window.matchMedia(MOBILE_QUERY).matches;
 }
 
+function MagneticNavLink({
+  label,
+  href,
+  index,
+}: {
+  label: string;
+  href: string;
+  index: number;
+}) {
+  const linkX = useMotionValue(0);
+  const linkY = useMotionValue(0);
+  const springLinkX = useSpring(linkX, { stiffness: 210, damping: 14, mass: 0.45 });
+  const springLinkY = useSpring(linkY, { stiffness: 210, damping: 14, mass: 0.45 });
+
+  const handleMove = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const dx = e.clientX - (rect.left + rect.width / 2);
+    const dy = e.clientY - (rect.top + rect.height / 2);
+    linkX.set(dx * 0.48);
+    linkY.set(dy * 0.62);
+  };
+
+  const handleLeave = () => {
+    linkX.set(0);
+    linkY.set(0);
+  };
+
+  return (
+    <motion.span
+      custom={index}
+      variants={navLinkVariants}
+      style={{ display: "inline-block", transformOrigin: "right center", willChange: "transform, opacity, filter" }}
+    >
+      <motion.a
+        href={href}
+        className="-mx-4 -my-3 block px-4 py-3 text-sm"
+        onMouseMove={handleMove}
+        onMouseLeave={handleLeave}
+        style={{ x: springLinkX, y: springLinkY, willChange: "transform" }}
+        whileHover={{ scale: 1.09 }}
+        transition={{ duration: 0.25, ease: EASE }}
+      >
+        {label}
+      </motion.a>
+    </motion.span>
+  );
+}
+
 export default function Nav() {
   const [scrolled, setScrolled]           = useState(false);
   const [open, setOpen]                   = useState(false);
+  const [showBurger, setShowBurger]       = useState(false);
   const [burgerHovered, setBurgerHovered] = useState(false);
   const mobileNav                         = useSyncExternalStore(subscribeToMobileNav, getMobileNavSnapshot, () => false);
 
@@ -35,7 +112,7 @@ export default function Nav() {
   const magnetY = useMotionValue(0);
   const springX = useSpring(magnetX, { stiffness: 160, damping: 14, mass: 0.6 });
   const springY = useSpring(magnetY, { stiffness: 160, damping: 14, mass: 0.6 });
-  const zoneRef = useRef<HTMLDivElement>(null);
+  const zoneRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     const onScroll = () => {
@@ -51,16 +128,34 @@ export default function Nav() {
   }, [open]);
 
   useEffect(() => {
+    if (mobileNav) {
+      const frame = requestAnimationFrame(() => setShowBurger(true));
+      return () => cancelAnimationFrame(frame);
+    }
+
+    if (scrolled) {
+      const id = window.setTimeout(() => setShowBurger(true), 430);
+      return () => window.clearTimeout(id);
+    }
+
+    const frame = requestAnimationFrame(() => setShowBurger(false));
+    return () => cancelAnimationFrame(frame);
+  }, [mobileNav, scrolled]);
+
+  useEffect(() => {
     if (!scrolled) {
-      magnetX.set(0);
-      magnetY.set(0);
-      setBurgerHovered(false);
+      const frame = requestAnimationFrame(() => {
+        magnetX.set(0);
+        magnetY.set(0);
+        setBurgerHovered(false);
+      });
+      return () => cancelAnimationFrame(frame);
     }
   }, [scrolled, magnetX, magnetY]);
 
   const close = () => setOpen(false);
 
-  const handleMagnetMove = (e: React.MouseEvent<HTMLDivElement>) => {
+  const handleMagnetMove = (e: React.MouseEvent<HTMLButtonElement>) => {
     if (!zoneRef.current) return;
     const rect = zoneRef.current.getBoundingClientRect();
     const dx = e.clientX - (rect.left + rect.width / 2);
@@ -91,30 +186,32 @@ export default function Nav() {
 
         <div className="flex items-center gap-8" style={{ position: "relative" }}>
 
-          {/* Nav links — crossfade out on scroll */}
+          {/* Nav links — compress toward the burger on scroll */}
           <motion.nav
             className="hidden items-center gap-8 md:flex"
-            animate={{ opacity: scrolled ? 0 : 1, y: scrolled ? -6 : 0 }}
-            transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
+            variants={navVariants}
+            initial="visible"
+            animate={scrolled ? "compact" : "visible"}
             style={{ pointerEvents: scrolled ? "none" : "auto" }}
           >
             {links.map((l, i) => (
-              <motion.a
+              <MagneticNavLink
                 key={l.label}
+                label={l.label}
                 href={l.href}
-                className="text-sm"
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: 0.2 + i * 0.08, ease: "easeOut" }}
-              >
-                <TextReveal text={l.label} duration={600} />
-              </motion.a>
+                index={i}
+              />
             ))}
           </motion.nav>
 
           {/* ── Magnetic burger zone ── */}
-          <div
+          <button
+            type="button"
             ref={zoneRef}
+            aria-label={open ? "Close navigation menu" : "Open navigation menu"}
+            aria-expanded={open}
+            aria-hidden={!showBurger}
+            tabIndex={showBurger ? 0 : -1}
             onMouseMove={handleMagnetMove}
             onMouseLeave={handleMagnetLeave}
             onClick={() => setOpen((o) => !o)}
@@ -126,8 +223,12 @@ export default function Nav() {
               display: "flex",
               alignItems: "center",
               justifyContent: "flex-end",
+              padding: 0,
+              border: 0,
+              background: "transparent",
+              color: "inherit",
               cursor: "pointer",
-              pointerEvents: scrolled || mobileNav ? "auto" : "none",
+              pointerEvents: showBurger ? "auto" : "none",
             }}
           >
             <motion.div
@@ -143,10 +244,11 @@ export default function Nav() {
                 gap: 7,
               }}
               animate={{
-                opacity: scrolled || mobileNav ? 1 : 0,
-                scale: scrolled || mobileNav ? 1 : 0.8,
+                opacity: showBurger ? 1 : 0,
+                scale: showBurger ? 1 : 0.72,
+                x: showBurger ? 0 : 10,
               }}
-              transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
+              transition={{ duration: 0.32, ease: EASE }}
               whileTap={{ scale: 0.88 }}
             >
               <motion.span
@@ -168,7 +270,7 @@ export default function Nav() {
                 transition={{ duration: 0.35, ease: EASE }}
               />
             </motion.div>
-          </div>
+          </button>
 
         </div>
       </motion.header>
@@ -221,7 +323,7 @@ export default function Nav() {
                     exit={{ y: "110%" }}
                     transition={{ duration: 0.45, ease: EASE, delay: i * 0.06 }}
                   >
-                    <TextReveal text={l.label} duration={700} />
+                    {l.label}
                   </motion.a>
                 </div>
               ))}
