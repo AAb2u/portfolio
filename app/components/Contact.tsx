@@ -7,8 +7,7 @@ const BG = "#111111";
 const FG = "#E9E9E3";
 const MUTED = "rgba(233,233,227,0.45)";
 const BORDER = "rgba(233,233,227,0.12)";
-const LINKEDIN_PROFILE_IMAGE =
-  "https://media.licdn.com/dms/image/v2/D4E03AQGjMu8_MuzK0w/profile-displayphoto-shrink_400_400/B4EZYQZkQkHYAg-/0/1744031860160?e=1782950400&v=beta&t=8JherjwnF5ZJqy899H5pnkoT6T6bjOYtRnzSon5dSGg";
+const PROFILE_IMAGE = "/me.png";
 
 function formatTime() {
   return new Date().toLocaleTimeString("en-US", {
@@ -50,9 +49,12 @@ export default function Contact() {
             <div className="relative h-[clamp(44px,10vw,80px)] w-[clamp(44px,10vw,80px)] shrink-0">
               <div
                 aria-label="Abdenour Akrour"
-                className="absolute inset-0 rounded-full bg-cover bg-center"
+                className="absolute inset-0 rounded-full bg-cover"
                 role="img"
-                style={{ backgroundImage: `url(${LINKEDIN_PROFILE_IMAGE})` }}
+                style={{
+                  backgroundImage: `url(${PROFILE_IMAGE})`,
+                  backgroundPosition: "center 30%",
+                }}
               />
               <span
                 className="absolute bottom-0.5 right-0.5 h-2.5 w-2.5 rounded-full border-2 sm:h-3 sm:w-3"

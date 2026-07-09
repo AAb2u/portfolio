@@ -7,6 +7,16 @@ const HOVER_BZ = "cubic-bezier(0.7, 0, 0.3, 1)";
 const EXPAND_BZ = "cubic-bezier(0.34, 1, 0.64, 1)";
 const COLLAPSE_BZ = "cubic-bezier(0.36, 0, 0.66, 0)";
 
+// Mobile wipe timing: the photo stays fully stable while you're on a title,
+// then the wipe *begins at the divider line* between two titles (raw fraction
+// 0.5) and completes over `WIPE_WIDTH` of scroll after it.
+const WIPE_START = 0.5; // the divider line between two titles
+const WIPE_WIDTH = 0.32; // how much scroll the change takes, after the line
+function wipeBlend(f: number) {
+  const t = Math.min(Math.max((f - WIPE_START) / WIPE_WIDTH, 0), 1);
+  return t * t * (3 - 2 * t); // smoothstep for a soft in/out
+}
+
 const projects = [
   {
     name: "EasySave",
@@ -44,6 +54,10 @@ const projects = [
 
 export default function Work() {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  // Mobile-only: a continuous scroll position across the titles (no cursor on
+  // phones). Fractional value lets the preview wipe between two screenshots.
+  const [scrollPos, setScrollPos] = useState<number | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
   const imageWrapRef = useRef<HTMLDivElement>(null);
   const rawPos = useRef({ x: 0, y: 0 });
   const lerpPos = useRef({ x: 0, y: 0 });
@@ -88,7 +102,85 @@ export default function Work() {
     };
   }, []);
 
+  // Track whether we're on a phone-sized (no-cursor) viewport
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 639px)");
+    const update = () => setIsMobile(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
+
+  // Mobile: track a continuous position among the title centres so the preview
+  // image can wipe from one screenshot to the next while scrolling between two
+  // titles. Only active while the viewport centre sits inside the list.
+  useEffect(() => {
+    // Desktop keeps a stale scrollPos, but the mobile preview is `sm:hidden`
+    // there, so it never shows — no reset needed (and none is allowed in-body).
+    if (!isMobile) return;
+    let raf = 0;
+    const update = () => {
+      raf = 0;
+      const rows = Array.from(
+        document.querySelectorAll<HTMLElement>("[data-mobile-project]")
+      );
+      if (!rows.length) return;
+
+      const center = window.innerHeight / 2;
+      const centers = rows.map((el) => {
+        const r = el.getBoundingClientRect();
+        return r.top + r.height / 2;
+      });
+      const firstTop = rows[0].getBoundingClientRect().top;
+      const lastBottom = rows[rows.length - 1].getBoundingClientRect().bottom;
+
+      // Hide the preview when the viewport centre is outside the list
+      if (center < firstTop || center > lastBottom) {
+        setScrollPos((prev) => (prev === null ? prev : null));
+        return;
+      }
+
+      let pos: number;
+      if (center <= centers[0]) {
+        pos = 0;
+      } else if (center >= centers[centers.length - 1]) {
+        pos = centers.length - 1;
+      } else {
+        let i = 0;
+        while (i < centers.length - 1 && center > centers[i + 1]) i++;
+        const span = centers[i + 1] - centers[i] || 1;
+        pos = i + (center - centers[i]) / span;
+      }
+
+      setScrollPos((prev) =>
+        prev !== null && Math.abs(prev - pos) < 0.002 ? prev : pos
+      );
+    };
+
+    const onScroll = () => {
+      if (!raf) raf = requestAnimationFrame(update);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    update();
+
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+      if (raf) cancelAnimationFrame(raf);
+    };
+  }, [isMobile]);
+
   const isAnyHovered = hoveredIndex !== null;
+
+  // Mobile preview: the two screenshots to blend + which title reads as active
+  const lastIdx = projects.length - 1;
+  const mobileActive = scrollPos !== null;
+  const lowerIdx = mobileActive ? Math.min(Math.floor(scrollPos), lastIdx) : 0;
+  const upperIdx = Math.min(lowerIdx + 1, lastIdx);
+  // Raw 0..1 across the gap, remapped so the wipe concentrates on the divider
+  const blend = mobileActive ? wipeBlend(scrollPos - lowerIdx) : 0;
+  const activeIndex = mobileActive ? Math.round(scrollPos) : null;
 
   return (
     <section
@@ -134,8 +226,8 @@ export default function Work() {
         <span className="text-[11px] text-muted">Click to access ↗</span>
       </motion.div>
 
-      {/* Project list */}
-      <div className="relative z-10">
+      {/* Project list — desktop (cursor-driven hover preview) */}
+      <div className="relative z-10 hidden sm:block">
         <div className="h-px w-full bg-[#111111]/15" />
 
         {projects.map((p, i) => (
@@ -235,6 +327,61 @@ export default function Work() {
         ))}
       </div>
 
+      {/* Project list — mobile (scroll-driven preview, no cursor on phones) */}
+      <div className="relative z-10 sm:hidden">
+        <div className="h-px w-full bg-[#111111]/15" />
+
+        {projects.map((p, i) => {
+          const active = activeIndex === i;
+          return (
+            <div key={p.name}>
+              <motion.div
+                initial={{ x: -20, opacity: 0 }}
+                whileInView={{ x: 0, opacity: 1 }}
+                viewport={{ once: true, margin: "-40px" }}
+                transition={{ duration: 0.5, delay: i * 0.08, ease: [0.25, 0.1, 0.25, 1] }}
+              >
+                <a
+                  href={p.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  data-mobile-project={i}
+                  className="relative flex min-h-[44vh] flex-col items-center justify-center py-10 text-center"
+                  style={{
+                    opacity: activeIndex !== null && !active ? 0.2 : 1,
+                    transition: `opacity 0.5s ${HOVER_BZ}`,
+                  }}
+                >
+                  <h3
+                    className="text-[clamp(26px,7.5vw,40px)] font-normal leading-[1.06]"
+                    style={{
+                      scale: active ? 1.06 : 1,
+                      letterSpacing: active ? "-0.03em" : "-0.02em",
+                      transformOrigin: "center",
+                      transition: `scale 0.5s ${HOVER_BZ}, letter-spacing 0.5s ${HOVER_BZ}`,
+                    }}
+                  >
+                    {p.name}
+                  </h3>
+
+                  <div
+                    className="mt-4 flex flex-col items-center gap-1.5"
+                    style={{
+                      opacity: active ? 1 : 0.5,
+                      transition: `opacity 0.4s ease`,
+                    }}
+                  >
+                    <span className="text-[11px] text-foreground/70 tracking-wide">{p.tags}</span>
+                    <span className="text-[10px] text-foreground/35 tracking-[0.2em] uppercase">{p.year}</span>
+                  </div>
+                </a>
+              </motion.div>
+              <div className="h-px w-full bg-[#111111]/15" />
+            </div>
+          );
+        })}
+      </div>
+
       {/* Footer */}
       <motion.div
         className="relative z-10 flex justify-center pt-2"
@@ -256,10 +403,10 @@ export default function Work() {
         </a>
       </motion.div>
 
-      {/* Floating image preview — follows cursor with inertia */}
+      {/* Floating image preview — desktop only, follows cursor with inertia */}
       <div
         ref={imageWrapRef}
-        className="fixed top-0 left-0 pointer-events-none z-50 overflow-hidden"
+        className="fixed top-0 left-0 pointer-events-none z-50 overflow-hidden hidden sm:block"
         style={{
           width: isAnyHovered ? "clamp(16em, 38vw, 36em)" : "0",
           height: "clamp(10em, 24vw, 22.5em)",
@@ -291,6 +438,55 @@ export default function Work() {
             />
           )}
         </AnimatePresence>
+      </div>
+
+      {/* Floating image preview — mobile only. Two stacked screenshots: the
+          upper (next) one is revealed from the bottom in proportion to the
+          scroll between the two titles, so mid-gap you see half/half. */}
+      <div
+        className="fixed left-1/2 z-40 overflow-hidden pointer-events-none sm:hidden"
+        style={{
+          top: "41vh",
+          transform: "translate(-50%, -100%)",
+          width: mobileActive ? "min(62vw, 290px)" : "0",
+          height: "min(42vw, 200px)",
+          borderRadius: 3,
+          transition: mobileActive
+            ? `width 0.45s ${EXPAND_BZ}`
+            : `width 0.45s ${COLLAPSE_BZ}`,
+        }}
+      >
+        {/* base: current screenshot */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={projects[lowerIdx].image}
+          alt={projects[lowerIdx].name}
+          style={{
+            position: "absolute",
+            inset: 0,
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+            objectPosition: "top center",
+          }}
+        />
+        {/* overlay: next screenshot. clipPath is driven directly by scroll —
+            no CSS/motion transition, so it tracks the finger and never
+            keeps animating on its own after you stop scrolling. */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={projects[upperIdx].image}
+          alt={projects[upperIdx].name}
+          style={{
+            position: "absolute",
+            inset: 0,
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+            objectPosition: "top center",
+            clipPath: `inset(${(1 - blend) * 100}% 0% 0% 0%)`,
+          }}
+        />
       </div>
 
     </section>
