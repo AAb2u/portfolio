@@ -1,13 +1,14 @@
 "use client";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { lockScroll } from "../lib/smoothScroll";
 
 export default function Loader() {
   const [progress, setProgress] = useState(0);
   const [visible, setVisible] = useState(true);
 
   useEffect(() => {
-    document.body.style.overflow = "hidden";
+    const unlock = lockScroll();
 
     const ASSETS = [
       "/gif/web-111.gif",
@@ -48,13 +49,13 @@ export default function Loader() {
     Promise.all([timerDone, assetsDone]).then(() => {
       setTimeout(() => {
         setVisible(false);
-        document.body.style.overflow = "";
+        unlock();
       }, 300);
     });
 
     return () => {
       cancelAnimationFrame(rafId);
-      document.body.style.overflow = "";
+      unlock();
     };
   }, []);
 

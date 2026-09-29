@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import Script from "next/script";
+import "lenis/dist/lenis.css";
 import "./globals.css";
 import Cursor from "./components/Cursor";
 import Loader from "./components/Loader";
+import SmoothScroll from "./components/SmoothScroll";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -38,6 +40,7 @@ export default function RootLayout({
             if(t==='dark'||(t===null&&d))document.documentElement.classList.add('dark');
           })();
         `}</Script>
+        <SmoothScroll />
         <Loader />
         <Cursor />
         {children}

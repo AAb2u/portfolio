@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect, useRef, useSyncExternalStore } from "react";
 import { motion, AnimatePresence, useMotionValue, useSpring } from "framer-motion";
+import { scrollToY, lockScroll } from "../lib/smoothScroll";
 
 const links = [
   { label: "About",          href: "#about" },
@@ -146,8 +147,8 @@ export default function Nav() {
       if (top === null) return;
       e.preventDefault();
       setOpen(false);
-      document.body.style.overflow = "";
-      window.scrollTo({ top, behavior: "smooth" });
+      // Wait a frame so the menu's scroll lock is released before scrolling
+      requestAnimationFrame(() => scrollToY(top));
       history.pushState(null, "", hash);
     };
     document.addEventListener("click", onClick);
@@ -155,8 +156,8 @@ export default function Nav() {
   }, []);
 
   useEffect(() => {
-    document.body.style.overflow = open ? "hidden" : "";
-    return () => { document.body.style.overflow = ""; };
+    if (!open) return;
+    return lockScroll();
   }, [open]);
 
   useEffect(() => {
