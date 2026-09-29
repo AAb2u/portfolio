@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import TextReveal from "./TextReveal";
+import ContactForm from "./ContactForm";
 
 const BG = "#111111";
 const FG = "#E9E9E3";
@@ -21,6 +22,15 @@ function formatTime() {
 
 export default function Contact() {
   const [time, setTime] = useState("");
+  const [formOpen, setFormOpen] = useState(false);
+  const [formOrigin, setFormOrigin] = useState({ x: 0, y: 0 });
+  const closeForm = useCallback(() => setFormOpen(false), []);
+
+  const openForm = (e: React.MouseEvent<HTMLButtonElement>) => {
+    const r = e.currentTarget.getBoundingClientRect();
+    setFormOrigin({ x: r.left + r.width / 2, y: r.top + r.height / 2 });
+    setFormOpen(true);
+  };
 
   useEffect(() => {
     const frame = requestAnimationFrame(() => setTime(formatTime()));
@@ -68,14 +78,17 @@ export default function Contact() {
 
         <div className="relative mt-10 flex items-center sm:mt-16">
           <div className="h-px flex-1" style={{ backgroundColor: BORDER }} />
-          <a
-            href="mailto:akrourabdenour9@gmail.com"
-            aria-label="Send an email to Abdenour Akrour"
+          <button
+            type="button"
+            onClick={openForm}
+            aria-label="Open the contact form"
+            aria-haspopup="dialog"
+            aria-expanded={formOpen}
             className="ml-4 inline-flex h-16 w-16 shrink-0 items-center justify-center rounded-full text-center text-[11px] font-semibold leading-tight transition-transform hover:scale-105 focus-visible:scale-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#E9E9E3] sm:absolute sm:right-0 sm:ml-0 sm:h-[clamp(120px,10vw,160px)] sm:w-[clamp(120px,10vw,160px)] sm:text-[13px]"
             style={{ backgroundColor: FG, color: BG }}
           >
             Let&apos;s talk
-          </a>
+          </button>
         </div>
 
         <div className="mt-7 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
@@ -143,6 +156,8 @@ export default function Contact() {
           </div>
         </footer>
       </div>
+
+      <ContactForm open={formOpen} origin={formOrigin} onClose={closeForm} />
     </section>
   );
 }
