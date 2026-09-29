@@ -27,7 +27,7 @@ export default function ProcessContactReveal() {
   const processY = useTransform(scrollYProgress, [0.60, 1], ["0vh", "-100vh"]);
 
   return (
-    <div ref={wrapperRef} style={{ position: "relative", height: "500vh", backgroundColor: "#eeeeeb" }}>
+    <div id="process-contact" ref={wrapperRef} style={{ position: "relative", height: "500vh", backgroundColor: "#eeeeeb" }}>
 
       {/* Contact — sticky behind */}
       <div ref={contactRef} style={{ position: "sticky", top: 0, zIndex: 0 }}>

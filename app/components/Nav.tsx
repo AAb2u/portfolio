@@ -41,6 +41,20 @@ const navLinkVariants = {
   }),
 };
 
+// Process and Contact are sticky inside one tall scroll track, so their DOM
+// position is always the track's top. Target the matching point on the track.
+function sectionTop(hash: string) {
+  const reveal = document.getElementById("process-contact");
+  if (reveal && (hash === "#process" || hash === "#contact")) {
+    const top = reveal.getBoundingClientRect().top + window.scrollY;
+    const track = reveal.offsetHeight - window.innerHeight;
+    // Process: 0.5 = every step revealed (done at 0.46), before it slides away (0.60)
+    return top + track * (hash === "#process" ? 0.5 : 1);
+  }
+  const el = document.getElementById(hash.slice(1));
+  return el ? el.getBoundingClientRect().top + window.scrollY : null;
+}
+
 function subscribeToMobileNav(onStoreChange: () => void) {
   if (typeof window === "undefined") return () => {};
   const query = window.matchMedia(MOBILE_QUERY);
@@ -120,6 +134,24 @@ export default function Nav() {
     };
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  // Handle every in-page anchor (nav, burger menu, hero CTAs) with sectionTop
+  useEffect(() => {
+    const onClick = (e: MouseEvent) => {
+      if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      const hash = (e.target as Element | null)?.closest?.('a[href^="#"]')?.getAttribute("href");
+      if (!hash || hash.length < 2) return;
+      const top = sectionTop(hash);
+      if (top === null) return;
+      e.preventDefault();
+      setOpen(false);
+      document.body.style.overflow = "";
+      window.scrollTo({ top, behavior: "smooth" });
+      history.pushState(null, "", hash);
+    };
+    document.addEventListener("click", onClick);
+    return () => document.removeEventListener("click", onClick);
   }, []);
 
   useEffect(() => {
