@@ -49,6 +49,17 @@ export default function Work() {
   const rawPos = useRef({ x: 0, y: 0 });
   const lerpPos = useRef({ x: 0, y: 0 });
   const rafRef = useRef<number>(0);
+  // Desktop preview: base = project above the cursor, overlay = project below,
+  // revealed from the bottom as the cursor moves from one title to the next.
+  const listRef = useRef<HTMLDivElement>(null);
+  const baseImgRef = useRef<HTMLImageElement>(null);
+  const overlayImgRef = useRef<HTMLImageElement>(null);
+  const pairRef = useRef<[number, number]>([0, 1]);
+  const hoveredRef = useRef(false);
+
+  useEffect(() => {
+    hoveredRef.current = hoveredIndex !== null;
+  }, [hoveredIndex]);
 
   useEffect(() => {
     const onMove = (e: MouseEvent) => {
@@ -69,13 +80,42 @@ export default function Work() {
     };
 
     const loop = () => {
+      rafRef.current = requestAnimationFrame(loop);
+      // Idle outside the list: no layout reads/writes while scrolling the page
+      if (!hoveredRef.current) return;
       lerpPos.current.x += (rawPos.current.x - lerpPos.current.x) * 0.083;
       lerpPos.current.y += (rawPos.current.y - lerpPos.current.y) * 0.083;
       if (imageWrapRef.current) {
-        imageWrapRef.current.style.left = `${lerpPos.current.x}px`;
-        imageWrapRef.current.style.top = `${lerpPos.current.y}px`;
+        imageWrapRef.current.style.transform =
+          `translate3d(${lerpPos.current.x}px, ${lerpPos.current.y}px, 0) translate(-50%, -52%)`;
       }
-      rafRef.current = requestAnimationFrame(loop);
+
+      const rows = listRef.current?.querySelectorAll<HTMLElement>("[data-project-index]");
+      if (rows?.length && baseImgRef.current && overlayImgRef.current) {
+        const y = rawPos.current.y;
+        const centers = Array.from(rows, (r) => {
+          const b = r.getBoundingClientRect();
+          return b.top + b.height / 2;
+        });
+        let lower = 0;
+        while (lower < centers.length - 2 && y > centers[lower + 1]) lower++;
+        const upper = Math.min(lower + 1, centers.length - 1);
+        const t = upper === lower
+          ? 0
+          : Math.min(Math.max((y - centers[lower]) / (centers[upper] - centers[lower]), 0), 1);
+
+        // Swap sources imperatively (not via state) so src and clip change in
+        // the same frame — no flash when crossing a title centre.
+        if (pairRef.current[0] !== lower || pairRef.current[1] !== upper) {
+          pairRef.current = [lower, upper];
+          baseImgRef.current.src = projects[lower].image;
+          baseImgRef.current.alt = projects[lower].name;
+          overlayImgRef.current.src = projects[upper].image;
+          overlayImgRef.current.alt = projects[upper].name;
+        }
+        // Halfway between two titles: top half = upper site, bottom half = lower site
+        overlayImgRef.current.style.clipPath = `inset(${(1 - t) * 100}% 0% 0% 0%)`;
+      }
     };
 
     window.addEventListener("mousemove", onMove);
@@ -203,7 +243,7 @@ export default function Work() {
       </motion.div>
 
       {/* Project list — desktop (cursor-driven hover preview) */}
-      <div className="relative z-10 hidden sm:block">
+      <div ref={listRef} className="relative z-10 hidden sm:block">
         <div className="h-px w-full bg-[#111111]/15" />
 
         {projects.map((p, i) => (
@@ -442,27 +482,35 @@ export default function Work() {
           position: "fixed",
         }}
       >
-        <AnimatePresence mode="sync">
-          {hoveredIndex !== null && (
-            <motion.img
-              key={hoveredIndex}
-              src={projects[hoveredIndex].image}
-              alt={projects[hoveredIndex].name}
-              initial={{ clipPath: "inset(100% 0 0 0)" }}
-              animate={{ clipPath: "inset(0% 0 0 0)" }}
-              exit={{ clipPath: "inset(0% 0 100% 0)" }}
-              transition={{ duration: 0.5, ease: [0.7, 0, 0.3, 1] }}
-              style={{
-                position: "absolute",
-                inset: 0,
-                width: "100%",
-                height: "100%",
-                objectFit: "cover",
-                objectPosition: "top center",
-              }}
-            />
-          )}
-        </AnimatePresence>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          ref={baseImgRef}
+          src={projects[0].image}
+          alt={projects[0].name}
+          style={{
+            position: "absolute",
+            inset: 0,
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+            objectPosition: "top center",
+          }}
+        />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          ref={overlayImgRef}
+          src={projects[Math.min(1, projects.length - 1)].image}
+          alt={projects[Math.min(1, projects.length - 1)].name}
+          style={{
+            position: "absolute",
+            inset: 0,
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+            objectPosition: "top center",
+            clipPath: "inset(100% 0% 0% 0%)",
+          }}
+        />
       </div>
 
       {/* Floating image preview — mobile only. Two stacked screenshots: the
