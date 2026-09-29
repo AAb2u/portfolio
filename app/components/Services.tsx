@@ -58,37 +58,37 @@ export default function Services() {
           viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.7, ease: introEase }}
         >
-          <span className="text-[11px] font-semibold uppercase text-[#1677ff]">
+          <span className="text-[10px] font-semibold uppercase tracking-[0.15em] text-[#1677ff]">
             Services
           </span>
-          <h2 className="mt-4 max-w-[960px] text-[clamp(42px,7vw,118px)] font-black leading-[0.9] tracking-normal">
+          <h2 className="mt-4 max-w-[960px] text-[clamp(40px,10vw,118px)] font-medium leading-[0.92] tracking-[-0.05em] sm:text-[clamp(42px,7vw,118px)] sm:font-black sm:tracking-normal">
             I can help you with<span className="text-[#1677ff]">.</span>
           </h2>
         </motion.div>
 
-        <div className="mt-16 grid gap-8 sm:col-start-2 sm:col-end-5 sm:row-start-3 sm:mt-0 sm:grid-cols-3 sm:gap-0">
+        <div className="mt-12 grid gap-0 sm:col-start-2 sm:col-end-5 sm:row-start-3 sm:mt-0 sm:grid-cols-3 sm:gap-0">
           {services.map((service, index) => (
             <motion.article
               key={service.num}
-              className="relative flex min-h-[330px] flex-col justify-between border border-[#eeeeeb]/15 bg-[#111111] p-6 sm:min-h-0 sm:border-0 sm:border-r sm:border-[#eeeeeb]/12 sm:bg-transparent sm:px-10 sm:py-10 lg:px-16"
+              className="relative flex min-h-[300px] flex-col justify-between border-t border-[#eeeeeb]/15 py-8 first:border-t-0 sm:min-h-0 sm:border-0 sm:border-r sm:border-[#eeeeeb]/12 sm:bg-transparent sm:px-10 sm:py-10 lg:px-16"
               initial={{ opacity: 0, y: 34 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-80px" }}
               transition={{ duration: 0.65, delay: index * 0.12, ease: introEase }}
             >
               <div>
-                <span className="block text-[clamp(64px,7vw,118px)] font-black leading-none text-[#eeeeeb]/12">
+                <span className="block text-[clamp(56px,7vw,118px)] font-medium leading-none text-[#eeeeeb]/12 sm:text-[clamp(64px,7vw,118px)] sm:font-black">
                   {service.num}
                 </span>
 
-                <div className="relative mt-2 h-36 w-full bg-[#111111] sm:mt-6 sm:h-44">
+                <div className="relative mt-2 h-32 w-full sm:mt-6 sm:h-44">
                   <Image
                     src={service.gif}
                     alt={service.title}
                     fill
                     unoptimized
                     sizes="(max-width: 640px) 100vw, 28vw"
-                    className="object-contain object-left opacity-80"
+                    className="object-contain object-left opacity-65 sm:opacity-80"
                     style={{
                       clipPath: service.clip ?? "none",
                     }}
@@ -97,10 +97,10 @@ export default function Services() {
               </div>
 
               <div>
-                <h3 className="text-[clamp(22px,2.1vw,34px)] font-semibold leading-none">
+                <h3 className="text-[clamp(24px,7vw,34px)] font-medium leading-none tracking-[-0.04em] sm:text-[clamp(22px,2.1vw,34px)] sm:font-semibold sm:tracking-normal">
                   {service.title}
                 </h3>
-                <p className="mt-5 max-w-[310px] text-[13px] leading-[1.7] text-[#eeeeeb]/55">
+                <p className="mt-4 max-w-[310px] text-[13px] leading-[1.65] text-[#eeeeeb]/55 sm:mt-5 sm:leading-[1.7]">
                   {service.desc}
                 </p>
               </div>
@@ -109,7 +109,7 @@ export default function Services() {
         </div>
 
         <motion.p
-          className="mt-10 text-[10px] leading-[1.55] text-[#eeeeeb]/45 sm:col-start-2 sm:col-end-5 sm:row-start-4 sm:mt-0 sm:self-start sm:px-10 sm:pt-8 lg:px-16"
+          className="mt-10 border-t border-[#eeeeeb]/15 pt-6 text-[10px] leading-[1.55] text-[#eeeeeb]/45 sm:col-start-2 sm:col-end-5 sm:row-start-4 sm:mt-0 sm:border-0 sm:pt-8 sm:self-start sm:px-10 lg:px-16"
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}

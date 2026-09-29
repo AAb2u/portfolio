@@ -7,16 +7,6 @@ const HOVER_BZ = "cubic-bezier(0.7, 0, 0.3, 1)";
 const EXPAND_BZ = "cubic-bezier(0.34, 1, 0.64, 1)";
 const COLLAPSE_BZ = "cubic-bezier(0.36, 0, 0.66, 0)";
 
-// Mobile wipe timing: the photo stays fully stable while you're on a title,
-// then the wipe *begins at the divider line* between two titles (raw fraction
-// 0.5) and completes over `WIPE_WIDTH` of scroll after it.
-const WIPE_START = 0.5; // the divider line between two titles
-const WIPE_WIDTH = 0.32; // how much scroll the change takes, after the line
-function wipeBlend(f: number) {
-  const t = Math.min(Math.max((f - WIPE_START) / WIPE_WIDTH, 0), 1);
-  return t * t * (3 - 2 * t); // smoothstep for a soft in/out
-}
-
 const projects = [
   {
     name: "EasySave",
@@ -43,21 +33,18 @@ const projects = [
     image: "/api/screenshot?url=https://pv-solution.com",
   },
   {
-    name: "Portfolio",
-    desc: "This personal portfolio site",
-    tags: "TypeScript, Next.js, Tailwind CSS",
-    year: "/25",
-    href: "https://portfolio-gilt-five-45.vercel.app/",
-    image: "/projects/portfolio.png",
+    name: "MedDeck",
+    desc: "Medical e-commerce platform",
+    tags: "E-commerce, Web Development",
+    year: "/26",
+    href: "https://meddeck-ecom.vercel.app/",
+    image: "/api/screenshot?url=https://meddeck-ecom.vercel.app/",
   },
 ];
 
 export default function Work() {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
-  // Mobile-only: a continuous scroll position across the titles (no cursor on
-  // phones). Fractional value lets the preview wipe between two screenshots.
-  const [scrollPos, setScrollPos] = useState<number | null>(null);
-  const [isMobile, setIsMobile] = useState(false);
+  const [openMobileProject, setOpenMobileProject] = useState<number | null>(null);
   const imageWrapRef = useRef<HTMLDivElement>(null);
   const rawPos = useRef({ x: 0, y: 0 });
   const lerpPos = useRef({ x: 0, y: 0 });
@@ -102,19 +89,10 @@ export default function Work() {
     };
   }, []);
 
-  // Track whether we're on a phone-sized (no-cursor) viewport
-  useEffect(() => {
-    const mq = window.matchMedia("(max-width: 639px)");
-    const update = () => setIsMobile(mq.matches);
-    update();
-    mq.addEventListener("change", update);
-    return () => mq.removeEventListener("change", update);
-  }, []);
-
   // Mobile: track a continuous position among the title centres so the preview
   // image can wipe from one screenshot to the next while scrolling between two
   // titles. Only active while the viewport centre sits inside the list.
-  useEffect(() => {
+  /* useEffect(() => {
     // Desktop keeps a stale scrollPos, but the mobile preview is `sm:hidden`
     // there, so it never shows — no reset needed (and none is allowed in-body).
     if (!isMobile) return;
@@ -169,23 +147,21 @@ export default function Work() {
       window.removeEventListener("resize", onScroll);
       if (raf) cancelAnimationFrame(raf);
     };
-  }, [isMobile]);
+  }, [isMobile]); */
 
   const isAnyHovered = hoveredIndex !== null;
-
-  // Mobile preview: the two screenshots to blend + which title reads as active
-  const lastIdx = projects.length - 1;
-  const mobileActive = scrollPos !== null;
-  const lowerIdx = mobileActive ? Math.min(Math.floor(scrollPos), lastIdx) : 0;
-  const upperIdx = Math.min(lowerIdx + 1, lastIdx);
-  // Raw 0..1 across the gap, remapped so the wipe concentrates on the divider
-  const blend = mobileActive ? wipeBlend(scrollPos - lowerIdx) : 0;
-  const activeIndex = mobileActive ? Math.round(scrollPos) : null;
+  // Legacy mobile preview markup stays mounted but hidden; the accordion below
+  // owns the mobile interaction.
+  const activeIndex = openMobileProject;
+  const mobileActive = false;
+  const lowerIdx = 0;
+  const upperIdx = 0;
+  const blend = 0;
 
   return (
     <section
       id="work"
-      className="relative flex flex-col gap-8 overflow-hidden border-t border-[#111111]/15 bg-[#eeeeeb] px-8 py-24 text-[#252525] sm:px-24 sm:py-28"
+      className="relative flex flex-col gap-8 overflow-hidden border-t border-[#111111]/15 bg-[#eeeeeb] px-6 py-20 text-[#252525] sm:px-24 sm:py-28"
       onMouseLeave={() => setHoveredIndex(null)}
     >
       <div
@@ -203,7 +179,7 @@ export default function Work() {
 
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 grid grid-cols-[28px_1fr_28px] sm:hidden"
+        className="pointer-events-none absolute inset-0 hidden grid-cols-[28px_1fr_28px] sm:hidden"
         style={{
           gridTemplateRows: `140px repeat(${projects.length}, minmax(124px, 1fr)) 96px`,
         }}
@@ -220,7 +196,7 @@ export default function Work() {
         viewport={{ once: true }}
         transition={{ duration: 0.5 }}
       >
-        <h2 className="text-2xl font-semibold">
+        <h2 className="text-[11px] font-semibold uppercase tracking-[0.16em] sm:text-2xl sm:normal-case sm:tracking-normal">
           Selected Work<sup className="text-xs ml-0.5">({projects.length})</sup>
         </h2>
         <span className="text-[11px] text-muted">Click to access ↗</span>
@@ -328,11 +304,12 @@ export default function Work() {
       </div>
 
       {/* Project list — mobile (scroll-driven preview, no cursor on phones) */}
-      <div className="relative z-10 sm:hidden">
+      <div className="relative z-10 hidden sm:hidden">
         <div className="h-px w-full bg-[#111111]/15" />
 
         {projects.map((p, i) => {
-          const active = activeIndex === i;
+          const open = openMobileProject === i;
+          const active = open;
           return (
             <div key={p.name}>
               <motion.div
@@ -376,6 +353,54 @@ export default function Work() {
                   </div>
                 </a>
               </motion.div>
+              <div className="h-px w-full bg-[#111111]/15" />
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Project list — mobile accordion */}
+      <div className="relative z-10 sm:hidden">
+        <div className="h-px w-full bg-[#111111]/15" />
+        {projects.map((p, i) => {
+          const open = openMobileProject === i;
+          return (
+            <div key={p.name}>
+              <button
+                type="button"
+                aria-expanded={open}
+                aria-controls={`project-preview-${i}`}
+                onClick={() => setOpenMobileProject(open ? null : i)}
+                className="flex w-full items-center justify-between gap-5 py-5 text-left"
+              >
+                <span className="text-[clamp(40px,11vw,54px)] font-semibold leading-[0.95] tracking-[-0.065em]">{p.name}</span>
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center text-[32px] font-light leading-none text-[#252525]/55" aria-hidden>
+                  {open ? "−" : "+"}
+                </span>
+              </button>
+
+              <AnimatePresence initial={false}>
+                {open && (
+                  <motion.div
+                    id={`project-preview-${i}`}
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+                    className="overflow-hidden"
+                  >
+                    <div className="pb-6">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={p.image} alt={`Preview of ${p.name}`} className="h-48 w-full rounded-md border border-[#111111]/10 object-cover object-top" />
+                      <p className="mt-4 text-[13px] leading-[1.5] text-[#252525]/60">{p.desc}</p>
+                      <div className="mt-4 flex items-center justify-between gap-4">
+                        <span className="text-[10px] tracking-[0.12em] text-[#252525]/45">{p.tags}</span>
+                        <a href={p.href} target="_blank" rel="noopener noreferrer" className="shrink-0 text-[11px] font-medium underline underline-offset-4">Open project ↗</a>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
               <div className="h-px w-full bg-[#111111]/15" />
             </div>
           );
@@ -444,7 +469,7 @@ export default function Work() {
           upper (next) one is revealed from the bottom in proportion to the
           scroll between the two titles, so mid-gap you see half/half. */}
       <div
-        className="fixed left-1/2 z-40 overflow-hidden pointer-events-none sm:hidden"
+        className="fixed left-1/2 z-40 hidden overflow-hidden pointer-events-none sm:hidden"
         style={{
           top: "41vh",
           transform: "translate(-50%, -100%)",

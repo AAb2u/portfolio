@@ -26,3 +26,8 @@ body {
 }
 
 a, button { cursor: none; }
+
+@media (max-width: 639px) {
+  body, a, button { cursor: auto; }
+  body > div[class*="z-[9999]"] { display: none; }
+}

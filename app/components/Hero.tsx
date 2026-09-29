@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Image from "next/image";
 
 const socials = [
   { label: "LINKEDIN", href: "https://www.linkedin.com/in/akrour-abdenour-08a10235b" },
@@ -50,7 +51,54 @@ const ChatIcon = () => (
 
 export default function Hero() {
   return (
-    <section className="relative min-h-screen overflow-hidden bg-[#eeeeeb] text-[#252525]">
+    <>
+      {/* Mobile: a calm, card-based introduction. The desktop composition remains below unchanged. */}
+      <section className="relative overflow-hidden bg-[#d8d7d1] px-4 pb-5 pt-20 text-[#252525] sm:hidden">
+        <div className="pointer-events-none absolute inset-0 opacity-60" style={{ background: "radial-gradient(circle at 12% 12%, #eeeee9 0, transparent 34%), radial-gradient(circle at 94% 56%, #c2c0b9 0, transparent 42%)" }} />
+
+        <motion.div
+          className="relative mx-auto max-w-[430px]"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.65, ease: introEase }}
+        >
+          <div>
+            <div className="px-4 pb-10 pt-8">
+              <div className="flex items-center gap-3">
+                <div className="relative h-11 w-11 overflow-hidden rounded-full bg-white">
+                  <Image src="/me.png" alt="Abdenour Akrour" fill sizes="44px" className="object-cover object-[center_20%]" />
+                </div>
+                <div className="text-[11px] leading-tight">
+                  <p className="font-semibold text-[#252525]">Abdenour Akrour</p>
+                  <p className="mt-1 text-[#777772]">Software Engineer</p>
+                </div>
+              </div>
+
+              <h1 className="mt-10 text-[clamp(34px,10vw,46px)] font-medium leading-[0.98] tracking-[-0.05em]">
+                I build useful digital experiences.
+              </h1>
+              <p className="mt-5 max-w-[290px] text-[14px] leading-[1.55] text-[#6d6d68]">
+                Web apps, interactive experiences, and solid software systems — made with care in Algeria.
+              </p>
+
+              <div className="mt-7 flex flex-wrap gap-2">
+                <a href="#work" className="rounded-full bg-[#252525] px-4 py-2.5 text-[11px] font-medium text-[#eeeeeb]">View selected work</a>
+                <a href="/cv/cv%20(1).pdf" download="Abdenour-Akrour-CV.pdf" className="rounded-full border border-[#252525]/20 px-4 py-2.5 text-[11px] font-medium">Download CV</a>
+              </div>
+            </div>
+
+            <div className="border-t border-[#252525]/15 px-4 py-10">
+              <p className="text-[10px] font-semibold tracking-[0.15em] text-[#777772]">WHAT I DO</p>
+              <h2 className="mt-3 text-[30px] font-medium leading-[1.02] tracking-[-0.045em]">Design, code<br />and craft.</h2>
+              <p className="mt-7 max-w-[285px] text-[13px] leading-[1.55] text-[#777772]">
+                Focused on clean logic, thoughtful UX, and production-ready implementation.
+              </p>
+            </div>
+          </div>
+        </motion.div>
+      </section>
+
+    <section className="relative hidden min-h-screen overflow-hidden bg-[#eeeeeb] text-[#252525] sm:block">
       <motion.div
         className="relative grid min-h-screen w-full overflow-hidden bg-[#eeeeeb]"
         style={{
@@ -180,5 +228,6 @@ export default function Hero() {
         </div>
       </motion.div>
     </section>
+    </>
   );
 }
