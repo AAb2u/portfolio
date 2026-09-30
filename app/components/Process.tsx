@@ -1,5 +1,6 @@
 "use client";
-import { motion, MotionValue, useTransform } from "framer-motion";
+import { useState } from "react";
+import { AnimatePresence, motion, MotionValue, useMotionValueEvent, useTransform } from "framer-motion";
 
 const SearchIcon = () => (
   <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -36,7 +37,14 @@ export default function Process({ scrollYProgress }: { scrollYProgress: MotionVa
   // Ligne horizontale : [0.02 → 0.46] = scaleX 0→1
   // À scaleX=0.25 → step1 (scrollY≈0.13), scaleX=0.50 → step2 (≈0.24), scaleX=0.75 → step3 (≈0.35)
   const hLineScaleX = useTransform(scrollYProgress, [0.02, 0.46], [0, 1]);
-  const mobileLineScaleY = useTransform(scrollYProgress, [0.02, 0.46], [0, 1]);
+
+  // Mobile: one step open at a time, following the same timing as the desktop icons
+  const [activeStep, setActiveStep] = useState(0);
+  useMotionValueEvent(scrollYProgress, "change", (p) => {
+
+    const next = p >= 0.35 ? 3 : p >= 0.24 ? 2 : p >= 0.13 ? 1 : 0;
+    setActiveStep((cur) => (cur === next ? cur : next));
+  });
 
   // Icons — pop quand la ligne les atteint
   const s0i = useTransform(scrollYProgress, [0.020, 0.040], [0, 1]);
@@ -86,17 +94,8 @@ export default function Process({ scrollYProgress }: { scrollYProgress: MotionVa
         ))}
       </div>
 
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 grid grid-cols-[28px_1fr_28px] sm:hidden"
-      >
-        {Array.from({ length: 3 }).map((_, index) => (
-          <span key={index} className="border-r border-[#111111]/12 last:border-r-0" />
-        ))}
-      </div>
-
       {/* Header */}
-      <div className="relative z-10 flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-end" style={{ marginBottom: "clamp(18px, 3vh, 48px)" }}>
+      <div className="relative z-10 hidden items-start justify-between gap-3 sm:flex sm:flex-row sm:items-end" style={{ marginBottom: "clamp(18px, 3vh, 48px)" }}>
         <h2 className="text-[clamp(34px,9vw,52px)] font-light tracking-tight leading-[1.05]">
           My way of<br />getting things done.
         </h2>
@@ -182,49 +181,73 @@ export default function Process({ scrollYProgress }: { scrollYProgress: MotionVa
         </div>
       </div>
 
-      <div className="relative z-10 grid gap-3 sm:hidden">
-        <div className="pointer-events-none absolute left-[18px] top-[18px] bottom-[18px] w-px bg-[#111111]/15" />
-        <motion.div
-          className="pointer-events-none absolute left-[18px] top-[18px] bottom-[18px] w-px bg-[#111111]"
-          style={{ scaleY: mobileLineScaleY, transformOrigin: "top" }}
-        />
+      {/* Mobile: editorial list in the site's style. The step matching the scroll
+          position is open; the bar fills with the same progress as the desktop line. */}
+      <div className="relative z-10 pt-14 sm:hidden">
+        <div className="flex items-baseline justify-between">
+          <span className="text-[10px] font-semibold uppercase tracking-[0.15em] text-[#1677ff]">Process</span>
+          <span className="text-[10px] tabular-nums tracking-[0.12em] text-[#111111]/45">
+            0{activeStep + 1} / 0{steps.length}
+          </span>
+        </div>
+        <h2 className="mt-3 text-[clamp(34px,10vw,46px)] font-medium leading-[0.95] tracking-[-0.05em]">
+          My way of getting things done.
+        </h2>
 
-        {steps.map((step, index) => (
-          <article
-            key={step.title}
-            className="relative grid grid-cols-[38px_1fr] gap-3 border-t border-[#111111]/15 py-3"
-          >
-            <div className="relative flex justify-center">
-              <motion.span
-                className="relative z-10 flex h-9 w-9 items-center justify-center rounded-full border border-[#111111] bg-[#eeeeeb] text-muted"
-                style={{ scale: anims[index].i }}
-              >
-                {step.icon}
-              </motion.span>
-            </div>
+        <div className="relative mt-7 h-px w-full bg-[#111111]/15">
+          <motion.div
+            className="absolute inset-0 bg-[#111111]"
+            style={{ scaleX: hLineScaleX, transformOrigin: "left" }}
+          />
+        </div>
 
-            <motion.div
-              className="min-w-0"
-              style={{ y: anims[index].y, opacity: anims[index].o }}
-            >
-              <div className="flex items-baseline justify-between gap-3">
-                <h3 className="text-[15px] font-medium leading-tight">{step.title}</h3>
-                <span className="shrink-0 text-[10px] text-muted">{step.duration}</span>
-              </div>
-              <p
-                className="mt-2 text-[12px] leading-[1.45] text-muted"
-                style={{
-                  display: "-webkit-box",
-                  WebkitLineClamp: 2,
-                  WebkitBoxOrient: "vertical",
-                  overflow: "hidden",
-                }}
-              >
-                {step.desc}
-              </p>
-            </motion.div>
-          </article>
-        ))}
+        <ol className="mt-1">
+          {steps.map((step, index) => {
+            const open = activeStep === index;
+            return (
+              <li key={step.title} className="border-b border-[#111111]/15">
+                <div
+                  className="flex items-center gap-4 py-3.5 transition-opacity duration-500"
+                  style={{ opacity: open ? 1 : index < activeStep ? 0.45 : 0.3 }}
+                >
+                  <span className="w-5 text-[11px] tabular-nums text-[#111111]/45">0{index + 1}</span>
+                  <h3 className="flex-1 text-[clamp(19px,5.6vw,24px)] font-medium leading-tight tracking-[-0.035em]">
+                    {step.title}
+                  </h3>
+                  <span
+                    className="grid h-8 w-8 shrink-0 place-items-center rounded-full border transition-colors duration-500"
+                    style={{
+                      borderColor: open ? "#111111" : "rgba(17,17,17,0.15)",
+                      background: open ? "#111111" : "transparent",
+                      color: open ? "#eeeeeb" : "#888888",
+                    }}
+                  >
+                    {step.icon}
+                  </span>
+                </div>
+
+                <AnimatePresence initial={false}>
+                  {open && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+                      className="overflow-hidden"
+                    >
+                      <div className="pb-4 pl-9">
+                        <p className="text-[13px] leading-[1.55] text-[#111111]/60">{step.desc}</p>
+                        <span className="mt-3 inline-block rounded-full border border-[#111111]/15 px-3 py-1 text-[10px] uppercase tracking-[0.12em] text-[#111111]/55">
+                          {step.duration}
+                        </span>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </li>
+            );
+          })}
+        </ol>
       </div>
     </section>
   );
