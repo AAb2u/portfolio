@@ -105,6 +105,7 @@ function MagneticNavLink({
     >
       <motion.a
         href={href}
+        data-sound="hover"
         className="-mx-4 -my-3 block px-4 py-3 text-sm"
         onMouseMove={handleMove}
         onMouseLeave={handleLeave}
@@ -349,7 +350,8 @@ export default function Nav() {
                 <div key={l.label} style={{ overflow: "hidden" }}>
                   <motion.a
                     href={l.href}
-                                onClick={close}
+                    data-sound="hover"
+                    onClick={close}
                     className="block font-medium leading-tight tracking-tight"
                     style={{ fontSize: "clamp(28px, 4vw, 52px)", color: "#111111" }}
                     onMouseEnter={e => (e.currentTarget.style.opacity = "0.3")}

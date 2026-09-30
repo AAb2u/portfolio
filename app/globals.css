@@ -32,3 +32,9 @@ a, button { cursor: none; }
   body, a, button { cursor: auto; }
   body > div[class*="z-[9999]"] { display: none; }
 }
+
+/* Sound toggle equaliser bars */
+@keyframes sound-bar {
+  from { transform: scaleY(0.25); }
+  to { transform: scaleY(1); }
+}

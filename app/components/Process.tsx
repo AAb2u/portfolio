@@ -1,5 +1,6 @@
 "use client";
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { play } from "../lib/sound";
 import { AnimatePresence, motion, MotionValue, useMotionValueEvent, useTransform } from "framer-motion";
 
 const SearchIcon = () => (
@@ -40,7 +41,13 @@ export default function Process({ scrollYProgress }: { scrollYProgress: MotionVa
 
   // Mobile: one step open at a time, following the same timing as the desktop icons
   const [activeStep, setActiveStep] = useState(0);
+  // Steps reached so far (icons pop at 0.02 / 0.13 / 0.24 / 0.35): each new one
+  // clicks softly into place. Scrolling back up stays silent.
+  const reachedRef = useRef(0);
   useMotionValueEvent(scrollYProgress, "change", (p) => {
+    const reached = [0.02, 0.13, 0.24, 0.35].filter((t) => p >= t).length;
+    if (reached > reachedRef.current) play("step");
+    reachedRef.current = reached;
 
     const next = p >= 0.35 ? 3 : p >= 0.24 ? 2 : p >= 0.13 ? 1 : 0;
     setActiveStep((cur) => (cur === next ? cur : next));

@@ -262,6 +262,7 @@ export default function Work() {
               className="relative block min-h-[210px] px-0 py-10 sm:min-h-[180px] sm:px-16"
               data-cursor="view"
               data-project-index={i}
+              data-sound="row"
               onMouseEnter={() => {
                 lerpPos.current = { ...rawPos.current };
                 setHoveredIndex(i);

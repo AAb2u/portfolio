@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import CircleOverlay, { CloseButton } from "./CircleOverlay";
 import { closeOverlay, getOverlayState, subscribeOverlay } from "../lib/overlays";
+import { play, preloadTyping } from "../lib/sound";
 
 type Status = "idle" | "sending" | "sent" | "error";
 
@@ -19,6 +20,7 @@ export default function ContactForm() {
 
   useEffect(() => {
     if (!open) return;
+    preloadTyping();
     const focus = window.setTimeout(() => firstFieldRef.current?.focus(), 900);
     return () => window.clearTimeout(focus);
   }, [open]);
@@ -34,9 +36,22 @@ export default function ContactForm() {
         body: JSON.stringify(data),
       });
       setStatus(res.ok ? "sent" : "error");
+      play(res.ok ? "success" : "error");
     } catch {
       setStatus("error");
+      play("error");
     }
+  };
+
+  // Typewriter feedback while writing the message (typing keys only)
+  const typewriterSound = (e: React.KeyboardEvent<HTMLFormElement>) => {
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    const tag = (e.target as HTMLElement).tagName;
+    if (tag !== "INPUT" && tag !== "TEXTAREA") return;
+    if (e.key === " ") play("space");
+    else if (e.key === "Enter") play("return");
+    else if (e.key === "Backspace" || e.key === "Delete") play("backspace");
+    else if (e.key.length === 1) play("key");
   };
 
   return (
@@ -61,7 +76,7 @@ export default function ContactForm() {
             </button>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="mt-12 grid flex-1 content-start gap-8 sm:mt-16 sm:grid-cols-2 sm:gap-x-10">
+          <form onSubmit={handleSubmit} onKeyDown={typewriterSound} className="mt-12 grid flex-1 content-start gap-8 sm:mt-16 sm:grid-cols-2 sm:gap-x-10">
             <label className="flex flex-col gap-1">
               <span className="text-[11px] uppercase tracking-[0.15em] text-[#111111]/50">First name</span>
               <input ref={firstFieldRef} name="firstName" required maxLength={80} autoComplete="given-name" className={inputClass} placeholder="John" />

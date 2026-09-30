@@ -6,6 +6,7 @@ import "./globals.css";
 import Cursor from "./components/Cursor";
 import Loader from "./components/Loader";
 import SmoothScroll from "./components/SmoothScroll";
+import SoundLayer from "./components/SoundLayer";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -45,6 +46,7 @@ export default function RootLayout({
         <SmoothScroll />
         <Loader />
         <Cursor />
+        <SoundLayer />
         {children}
       </body>
     </html>

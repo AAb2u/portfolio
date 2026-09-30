@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useSyncExternalStore } from "react";
+import { useEffect, useRef, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { lockScroll } from "../lib/smoothScroll";
+import { play } from "../lib/sound";
 import type { OverlayOrigin } from "../lib/overlays";
 
 const EASE = [0.76, 0, 0.24, 1] as const;
@@ -36,6 +37,13 @@ export default function CircleOverlay({
     ? Math.ceil(Math.hypot(Math.max(x, window.innerWidth - x), Math.max(y, window.innerHeight - y)))
     : 1;
   const closedScale = Math.min(r / fullR, 1);
+
+  // Whoosh in time with the circle growing / shrinking (not on first mount)
+  const wasOpen = useRef(false);
+  useEffect(() => {
+    if (open !== wasOpen.current) play(open ? "open" : "close");
+    wasOpen.current = open;
+  }, [open]);
 
   useEffect(() => {
     if (!open) return;

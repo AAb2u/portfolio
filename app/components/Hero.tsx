@@ -162,6 +162,7 @@ export default function Hero() {
             <button
               key={item.kind}
               type="button"
+              data-sound="hover"
               aria-haspopup="dialog"
               className="group flex w-full items-center justify-between gap-4 border-b border-[#111111]/15 py-3.5 text-left first:border-t"
               // The icon circle is what grows into the full-screen page
