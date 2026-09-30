@@ -18,7 +18,9 @@ export function scrollToY(top: number) {
 /** Returns an unlock function; nested locks are counted. */
 export function lockScroll() {
   locks++;
-  document.body.style.overflow = "hidden";
+  // Lock on <html>, never <body>: an overflow:hidden body becomes the scroll
+  // container of the sticky Process/Contact track and they jump out of place.
+  document.documentElement.style.overflow = "hidden";
   lenis?.stop();
   let released = false;
   return () => {
@@ -26,7 +28,7 @@ export function lockScroll() {
     released = true;
     locks = Math.max(0, locks - 1);
     if (locks > 0) return;
-    document.body.style.overflow = "";
+    document.documentElement.style.overflow = "";
     lenis?.start();
   };
 }

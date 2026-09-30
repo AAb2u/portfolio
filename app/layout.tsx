@@ -32,7 +32,9 @@ export default function RootLayout({
         <link rel="preload" href="/projects/EasySave.png" as="image" />
         <link rel="preload" href="/projects/portfolio.png" as="image" />
       </head>
-      <body className="min-h-full flex flex-col bg-background text-foreground">
+      {/* clip, not hidden: a hidden body turns into a scroll container when <html>
+          is scroll-locked (menu, contact form) and the sticky sections jump */}
+      <body className="min-h-full flex flex-col bg-background text-foreground" style={{ overflowX: "clip" }}>
         <Script id="theme-init" strategy="beforeInteractive">{`
           (function(){
             var t=localStorage.getItem('theme');

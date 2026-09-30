@@ -18,7 +18,8 @@ body {
   background: var(--color-background);
   color: var(--color-foreground);
   font-family: var(--font-inter), system-ui, sans-serif;
-  overflow-x: hidden;
+  /* overflow-x: clip is set inline in layout.tsx (the CSS pipeline would
+     downgrade it to hidden, which breaks the sticky Process/Contact track) */
   transition: background 0.2s, color 0.2s;
   cursor: none;
   scrollbar-width: thin;
