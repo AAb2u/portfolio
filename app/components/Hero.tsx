@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import Image from "next/image";
+import { openOverlay } from "../lib/overlays";
 
 const socials = [
   { label: "LINKEDIN", href: "https://www.linkedin.com/in/akrour-abdenour-08a10235b" },
@@ -83,7 +84,7 @@ export default function Hero() {
 
               <div className="mt-7 flex flex-wrap gap-2">
                 <a href="#work" className="rounded-full bg-[#252525] px-4 py-2.5 text-[11px] font-medium text-[#eeeeeb]">View selected work</a>
-                <a href="/cv/cv%20(1).pdf" download="Abdenour-Akrour-CV.pdf" className="rounded-full border border-[#252525]/20 px-4 py-2.5 text-[11px] font-medium">Download CV</a>
+                <button type="button" aria-haspopup="dialog" onClick={(e) => openOverlay("cv", e.currentTarget)} className="rounded-full border border-[#252525]/20 px-4 py-2.5 text-[11px] font-medium">View my CV</button>
               </div>
             </div>
 
@@ -149,27 +150,32 @@ export default function Hero() {
         </motion.div>
 
         <motion.div
-          className="relative col-start-3 col-end-5 row-start-3 flex flex-col justify-center gap-5 px-8 text-[13px] text-[#555552] sm:col-start-3 sm:col-end-4 sm:px-10 lg:px-16"
+          className="relative col-start-3 col-end-5 row-start-3 flex max-w-[380px] flex-col justify-center px-8 text-[13px] text-[#555552] sm:col-start-3 sm:col-end-4 sm:px-10 lg:px-16"
           initial={{ opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.65, delay: 0.68, ease: introEase }}
         >
-          <a
-            className="group inline-flex w-fit items-center gap-3"
-            href="/cv/cv%20(1).pdf"
-            download="Abdenour-Akrour-CV.pdf"
-          >
-            <span className="grid h-7 w-7 place-items-center border border-[#a8a8a3] transition-colors group-hover:border-[#1677ff] group-hover:text-[#1677ff]">
-              <ResumeIcon />
-            </span>
-            <span>If you want my resume <span className="text-[#1677ff]">**</span></span>
-          </a>
-          <a className="group inline-flex w-fit items-center gap-3" href="#contact">
-            <span className="grid h-7 w-7 place-items-center border border-[#a8a8a3] transition-colors group-hover:border-[#1677ff] group-hover:text-[#1677ff]">
-              <ChatIcon />
-            </span>
-            <span>Or have chat</span>
-          </a>
+          {[
+            { kind: "cv" as const, label: "Read my resume", note: true, icon: <ResumeIcon /> },
+            { kind: "contact" as const, label: "Or have a chat", note: false, icon: <ChatIcon /> },
+          ].map((item) => (
+            <button
+              key={item.kind}
+              type="button"
+              aria-haspopup="dialog"
+              className="group flex w-full items-center justify-between gap-4 border-b border-[#111111]/15 py-3.5 text-left first:border-t"
+              // The icon circle is what grows into the full-screen page
+              onClick={(e) => openOverlay(item.kind, e.currentTarget.lastElementChild ?? e.currentTarget)}
+            >
+              <span className="text-[13px] text-[#252525] transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-1.5">
+                {item.label}
+                {item.note && <span className="text-[#1677ff]"> **</span>}
+              </span>
+              <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-[#111111]/20 text-[#555552] transition-colors duration-300 group-hover:border-[#111111] group-hover:bg-[#111111] group-hover:text-[#eeeeeb]">
+                {item.icon}
+              </span>
+            </button>
+          ))}
         </motion.div>
 
         <motion.p
