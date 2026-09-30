@@ -48,9 +48,12 @@ function sectionTop(hash: string) {
   const reveal = document.getElementById("process-contact");
   if (reveal && (hash === "#process" || hash === "#contact")) {
     const top = reveal.getBoundingClientRect().top + window.scrollY;
-    const track = reveal.offsetHeight - window.innerHeight;
+    // Reveal part of the track, without the extra px that scroll a tall Contact
+    const extra = Number(reveal.dataset.contactExtra) || 0;
+    const base = reveal.offsetHeight - window.innerHeight - extra;
     // Process: 0.5 = every step revealed (done at 0.46), before it slides away (0.60)
-    return top + track * (hash === "#process" ? 0.5 : 1);
+    // Contact: end of the reveal, Contact's top aligned with the viewport
+    return top + base * (hash === "#process" ? 0.5 : 1);
   }
   const el = document.getElementById(hash.slice(1));
   return el ? el.getBoundingClientRect().top + window.scrollY : null;
@@ -346,7 +349,7 @@ export default function Nav() {
                 <div key={l.label} style={{ overflow: "hidden" }}>
                   <motion.a
                     href={l.href}
-                    onClick={close}
+                                onClick={close}
                     className="block font-medium leading-tight tracking-tight"
                     style={{ fontSize: "clamp(28px, 4vw, 52px)", color: "#111111" }}
                     onMouseEnter={e => (e.currentTarget.style.opacity = "0.3")}

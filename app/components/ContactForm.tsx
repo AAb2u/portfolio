@@ -25,13 +25,19 @@ export default function ContactForm({
 }: {
   open: boolean;
   /** Centre of the "Let's talk" circle, kept after close so it shrinks back into it */
-  origin: { x: number; y: number };
+  origin: { x: number; y: number; r: number };
   onClose: () => void;
 }) {
   const [status, setStatus] = useState<Status>("idle");
   const firstFieldRef = useRef<HTMLInputElement>(null);
   const mounted = useSyncExternalStore(noopSubscribe, () => true, () => false);
-  const { x, y } = origin;
+  const { x, y, r } = origin;
+  // A real circle centred on the button, scaled from the button's size up to the
+  // distance of the farthest viewport corner (transform-only, so it stays smooth).
+  const fullR = mounted
+    ? Math.ceil(Math.hypot(Math.max(x, window.innerWidth - x), Math.max(y, window.innerHeight - y)))
+    : 1;
+  const closedScale = Math.min(r / fullR, 1);
 
   useEffect(() => {
     if (!open) return;
@@ -67,23 +73,36 @@ export default function ContactForm({
   return createPortal(
     <AnimatePresence onExitComplete={() => setStatus("idle")}>
       {open && (
-        <motion.div
+        <div
+          key="contact-dialog"
           role="dialog"
           aria-modal="true"
           aria-label="Contact form"
-          data-lenis-prevent
-          className="fixed inset-0 z-[70] overflow-y-auto"
-          style={{ backgroundColor: FG, color: BG }}
-          initial={{ clipPath: `circle(0px at ${x}px ${y}px)` }}
-          animate={{ clipPath: `circle(150vmax at ${x}px ${y}px)` }}
-          exit={{ clipPath: `circle(0px at ${x}px ${y}px)` }}
-          transition={{ duration: 0.8, ease: EASE }}
+          className="fixed inset-0 z-[70] overflow-hidden"
+          style={{ color: BG }}
         >
+          <motion.div
+            aria-hidden
+            className="absolute rounded-full"
+            style={{
+              left: x - fullR,
+              top: y - fullR,
+              width: fullR * 2,
+              height: fullR * 2,
+              backgroundColor: FG,
+              willChange: "transform",
+            }}
+            initial={{ scale: closedScale }}
+            animate={{ scale: 1, transition: { duration: 0.9, ease: EASE } }}
+            exit={{ scale: closedScale, transition: { duration: 0.8, delay: 0.15, ease: EASE } }}
+          />
+
+          <div data-lenis-prevent className="absolute inset-0 overflow-y-auto">
           <motion.div
             className="mx-auto flex min-h-full w-full max-w-5xl flex-col px-6 pb-10 pt-20 sm:px-8 sm:pt-16"
             initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0, transition: { duration: 0.5, delay: 0.35, ease: EASE } }}
-            exit={{ opacity: 0, transition: { duration: 0.2 } }}
+            animate={{ opacity: 1, y: 0, transition: { duration: 0.5, delay: 0.7, ease: EASE } }}
+            exit={{ opacity: 0, y: 0, transition: { duration: 0.2 } }}
           >
             <div className="flex items-start justify-between gap-6">
               <h2 className="text-[clamp(40px,8vw,96px)] font-light leading-[0.95]">
@@ -147,7 +166,8 @@ export default function ContactForm({
               </form>
             )}
           </motion.div>
-        </motion.div>
+          </div>
+        </div>
       )}
     </AnimatePresence>,
     document.body,

@@ -23,12 +23,12 @@ function formatTime() {
 export default function Contact() {
   const [time, setTime] = useState("");
   const [formOpen, setFormOpen] = useState(false);
-  const [formOrigin, setFormOrigin] = useState({ x: 0, y: 0 });
+  const [formOrigin, setFormOrigin] = useState({ x: 0, y: 0, r: 0 });
   const closeForm = useCallback(() => setFormOpen(false), []);
 
   const openForm = (e: React.MouseEvent<HTMLButtonElement>) => {
     const r = e.currentTarget.getBoundingClientRect();
-    setFormOrigin({ x: r.left + r.width / 2, y: r.top + r.height / 2 });
+    setFormOrigin({ x: r.left + r.width / 2, y: r.top + r.height / 2, r: r.width / 2 });
     setFormOpen(true);
   };
 
@@ -54,6 +54,8 @@ export default function Contact() {
       style={{ backgroundColor: BG, color: FG }}
     >
       <div className="mx-auto flex w-full max-w-5xl flex-1 flex-col px-6 pb-10 pt-20 sm:px-8 sm:pt-16">
+        {/* Heading, CTA and links are centred in the space above the footer */}
+        <div className="flex flex-1 flex-col justify-center">
         <div className="text-[clamp(44px,13vw,120px)] font-light leading-[0.95]">
           <div className="flex items-center gap-4 sm:gap-8">
             <div className="relative h-[clamp(44px,10vw,80px)] w-[clamp(44px,10vw,80px)] shrink-0">
@@ -91,7 +93,8 @@ export default function Contact() {
           </button>
         </div>
 
-        <div className="mt-7 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+        {/* sm+: the CTA circle is absolute on the right, keep the links clear of it */}
+        <div className="mt-7 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:pr-[calc(clamp(120px,10vw,160px)+16px)]">
           {[
             { text: "akrourabdenour9@gmail.com", href: "mailto:akrourabdenour9@gmail.com", external: false },
             { text: "github.com/AAb2u", href: "https://github.com/AAb2u", external: true },
@@ -107,12 +110,11 @@ export default function Contact() {
             </a>
           ))}
         </div>
-
-        <div className="flex-1" />
+        </div>
 
         <footer className="mt-12">
           <div className="mb-5 h-px" style={{ backgroundColor: BORDER }} />
-          <div className="grid gap-6 text-[11px] sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-x-4 gap-y-6 text-[11px] lg:grid-cols-4">
             <div className="flex flex-col gap-1.5">
               <span className="uppercase tracking-[0.1em]" style={{ color: MUTED }}>Version</span>
               <span>2025 Edition</span>
