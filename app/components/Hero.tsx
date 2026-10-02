@@ -181,6 +181,7 @@ export default function Hero() {
                 target="_blank"
                 rel="noopener noreferrer"
                 data-cursor="social"
+                data-sound="pop"
                 data-social={social.label.toLowerCase()}
                 className="flex items-center justify-center border-b border-[#111111]/15 text-[11px] font-semibold text-[#3f3f3d] transition-colors hover:text-[#1677ff]"
                 style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}

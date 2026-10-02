@@ -1,10 +1,10 @@
-// UI sounds (Web Audio). Interface sounds are synthesised; typing uses real
+// UI sounds (Web Audio). Interface sounds are synthesised, muffled "felt" taps; typing uses real
 // keystroke samples. Browsers only allow audio after a user gesture, so the
 // context is created/resumed on the first pointerdown or keydown; sounds
 // requested before that are silently skipped.
 
 export type SoundName =
-  | "hover" | "row" | "click" | "step" | "open" | "close" | "success" | "error" | "toggle"
+  | "hover" | "row" | "pop" | "click" | "step" | "open" | "close" | "success" | "error" | "toggle"
   | "key" | "space" | "return" | "backspace";
 
 const STORAGE_KEY = "sound";
@@ -160,6 +160,27 @@ function tap(freq: number, { dur = 0.03, gain = 0.1, q = 1.2, start = 0, type = 
   src.stop(t + dur + 0.02);
 }
 
+// Low-passed noise tap: a soft, felt-like knock with no bright click on top
+// (no loudness make-up here, unlike tap(): these are meant to stay quiet)
+function muffled(cutoff: number, { dur = 0.015, gain = 0.1, start = 0 } = {}) {
+  const { ctx, master, noise } = audio;
+  if (!ctx || !master || !noise) return;
+  const t = ctx.currentTime + start;
+  const src = ctx.createBufferSource();
+  src.buffer = noise;
+  const filter = ctx.createBiquadFilter();
+  filter.type = "lowpass";
+  filter.frequency.value = cutoff;
+  filter.Q.value = 0.7;
+  const g = ctx.createGain();
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(gain, t + 0.002);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  src.connect(filter).connect(g).connect(master);
+  src.start(t, Math.random() * 0.5);
+  src.stop(t + dur + 0.02);
+}
+
 // Soft air movement, low-passed so it stays in the background
 function air(from: number, to: number, dur: number, gain: number) {
   const { ctx, master, noise } = audio;
@@ -197,7 +218,7 @@ function sample(clip: number, { gain = 0.5, rate = 1 } = {}) {
 }
 
 // Minimum gap per sound, so fast mouse moves never turn into a buzz
-const THROTTLE: Partial<Record<SoundName, number>> = { hover: 70, row: 90, click: 40, step: 120, key: 25, space: 25, backspace: 25 };
+const THROTTLE: Partial<Record<SoundName, number>> = { hover: 70, row: 90, pop: 120, click: 40, step: 120, key: 25, space: 25, backspace: 25 };
 
 export function play(name: SoundName) {
   loadPreference();
@@ -213,24 +234,29 @@ export function play(name: SoundName) {
   if (now - (lastPlayed[name] ?? -Infinity) < gap) return;
   lastPlayed[name] = now;
 
-  // Kept deliberately small and quiet: UI feedback, not music
+  // Felt palette: muffled, low-passed taps (no bright transients, no melodic
+  // notes) so the UI sounds soft and physical. UI feedback, not music.
   switch (name) {
-    case "hover": // barely-there tick
-      tap(5200, { dur: 0.018, gain: 0.056, q: 2 });
+    case "hover": // barely-there felt tap
+      muffled(1400, { dur: 0.014, gain: 0.05 });
       break;
-    case "row": // slightly fuller tick for the project list
-      tap(3600, { dur: 0.025, gain: 0.08, q: 1.6 });
+    case "row": // slightly fuller for the project list
+      muffled(1100, { dur: 0.018, gain: 0.07 });
       break;
-    case "click": // soft key press: crisp top + short body
-      tap(2800, { dur: 0.03, gain: 0.192, q: 1 });
-      tone(170, { dur: 0.04, gain: 0.08 });
+    case "pop": // soft swell as the cursor grows into a preview
+      tone(300, { dur: 0.09, gain: 0.05, to: 460, attack: 0.01 });
+      muffled(1200, { dur: 0.016, gain: 0.05 });
       break;
-    case "toggle": // switch
-      tap(3200, { dur: 0.025, gain: 0.16, q: 1.4 });
-      tap(2200, { dur: 0.025, gain: 0.112, q: 1.4, start: 0.045 });
+    case "click": // muffled press with a little low body
+      muffled(900, { dur: 0.022, gain: 0.16 });
+      tone(140, { dur: 0.05, gain: 0.06 });
       break;
-    case "step": // quiet detent, like a dial clicking into place
-      tap(2400, { dur: 0.035, gain: 0.112, q: 3 });
+    case "toggle": // two soft presses
+      muffled(1000, { dur: 0.02, gain: 0.13 });
+      muffled(800, { dur: 0.02, gain: 0.1, start: 0.05 });
+      break;
+    case "step": // quiet detent
+      muffled(1000, { dur: 0.02, gain: 0.09 });
       break;
     case "open":
       air(600, 3200, 0.55, 0.05);
@@ -239,8 +265,8 @@ export function play(name: SoundName) {
       air(3000, 500, 0.45, 0.04);
       break;
     case "success": // single soft confirmation tone
-      tone(880, { dur: 0.5, gain: 0.056, attack: 0.02 });
-      tone(1320, { start: 0.06, dur: 0.45, gain: 0.032, attack: 0.02 });
+      tone(880, { dur: 0.5, gain: 0.05, attack: 0.02 });
+      tone(1320, { start: 0.06, dur: 0.45, gain: 0.03, attack: 0.02 });
       break;
     // Typing: real laptop keystrokes (random clip + slight pitch drift so fast
     // typing never sounds looped). Synth fallback while the samples load.
@@ -256,8 +282,9 @@ export function play(name: SoundName) {
     case "return":
       if (!sample(9, { gain: 0.24 })) tap(1200, { dur: 0.022, gain: 0.14 });
       break;
-    case "error":
-      tone(220, { dur: 0.22, gain: 0.08, attack: 0.01 });
+    case "error": // low, soft, not alarming
+      tone(180, { dur: 0.18, gain: 0.05, attack: 0.01 });
+      muffled(700, { dur: 0.03, gain: 0.1 });
       break;
   }
 }

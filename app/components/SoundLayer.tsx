@@ -3,8 +3,8 @@
 import { useEffect, useSyncExternalStore } from "react";
 import { initSound, isSoundEnabled, play, setSoundEnabled, subscribeSound } from "../lib/sound";
 
-// Global UI sounds: a soft tap on every click. Hover ticks are opt-in only
-// (data-sound="hover" or "row"), so the page never feels noisy.
+// Global UI sounds: a soft tick when hovering any link or button and a tap on
+// every click. data-sound="row" / "pop" pick a different hover sound,
 // data-sound="none" silences an element entirely.
 export default function SoundLayer() {
   const enabled = useSyncExternalStore(subscribeSound, isSoundEnabled, () => true);
@@ -22,8 +22,9 @@ export default function SoundLayer() {
       const el = target(e);
       if (el === hovered) return;
       hovered = el;
-      const kind = (el as HTMLElement | null)?.dataset.sound;
-      if (kind === "row" || kind === "hover") play(kind);
+      if (!el) return;
+      const kind = (el as HTMLElement).dataset.sound ?? "hover";
+      if (kind === "row" || kind === "pop" || kind === "hover") play(kind);
     };
 
     const onClick = (e: MouseEvent) => {
