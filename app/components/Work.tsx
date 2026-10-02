@@ -38,7 +38,7 @@ const projects = [
     tags: "E-commerce, Web Development",
     year: "/26",
     href: "https://meddeck-ecom.vercel.app/",
-    image: "/api/screenshot?url=https://meddeck-ecom.vercel.app/",
+    image: "/projects/MedDeck.png",
   },
 ];
 
