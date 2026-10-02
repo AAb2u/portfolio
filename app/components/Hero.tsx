@@ -12,41 +12,22 @@ const socials = [
 
 const introEase = [0.16, 1, 0.3, 1] as const;
 
-const ResumeIcon = () => (
+// Thin arrow echoing the one under the socials; tilts to → on hover
+const ArrowIcon = () => (
   <svg
     aria-hidden="true"
-    width="15"
-    height="15"
+    width="13"
+    height="13"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
-    strokeWidth="1.7"
+    strokeWidth="1.3"
     strokeLinecap="round"
     strokeLinejoin="round"
+    className="transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:rotate-45"
   >
-    <path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7z" />
-    <path d="M14 2v5h5" />
-    <path d="M9 13h6" />
-    <path d="M9 17h4" />
-  </svg>
-);
-
-const ChatIcon = () => (
-  <svg
-    aria-hidden="true"
-    width="15"
-    height="15"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.7"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d="M21 12a8 8 0 0 1-8 8H8l-5 3 1.7-5A8 8 0 1 1 21 12z" />
-    <path d="M8 12h.01" />
-    <path d="M12 12h.01" />
-    <path d="M16 12h.01" />
+    <path d="M6 18 18 6" />
+    <path d="M8 6h10v10" />
   </svg>
 );
 
@@ -157,8 +138,8 @@ export default function Hero() {
           transition={{ duration: 0.65, delay: 0.68, ease: introEase }}
         >
           {[
-            { kind: "cv" as const, label: "Read my resume", note: true, icon: <ResumeIcon /> },
-            { kind: "contact" as const, label: "Or have a chat", note: false, icon: <ChatIcon /> },
+            { kind: "cv" as const, label: "Read my resume", note: true },
+            { kind: "contact" as const, label: "Or have a chat", note: false },
           ].map((item) => (
             <button
               key={item.kind}
@@ -174,7 +155,7 @@ export default function Hero() {
                 {item.note && <span className="text-[#1677ff]"> **</span>}
               </span>
               <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-[#111111]/20 text-[#555552] transition-colors duration-300 group-hover:border-[#111111] group-hover:bg-[#111111] group-hover:text-[#eeeeeb]">
-                {item.icon}
+                <ArrowIcon />
               </span>
             </button>
           ))}
