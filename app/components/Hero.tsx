@@ -112,7 +112,8 @@ export default function Hero() {
       >
         <div className="pointer-events-none absolute inset-0 grid grid-cols-[minmax(54px,0.55fr)_minmax(0,2.2fr)_minmax(0,2.2fr)_minmax(112px,0.78fr)] grid-rows-[0.82fr_1.35fr_1.18fr_0.82fr]">
           {Array.from({ length: 16 }).map((_, index) => (
-            <span key={index} className="border-b border-r border-[#111111]/15 last:border-r-0" />
+            // Cell 7 (row 2, col 4) sits inside the socials column, which draws its own dividers
+            <span key={index} className={`border-r border-[#111111]/15 last:border-r-0 ${index === 7 ? "" : "border-b"}`} />
           ))}
         </div>
 
