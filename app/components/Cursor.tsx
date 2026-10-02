@@ -1,7 +1,18 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 
-type Mode = "default" | "hover" | "text" | "view";
+type Mode = "default" | "hover" | "text" | "view" | "social";
+type Social = "linkedin" | "github" | "instagram";
+
+// Previews shown in the bubble the cursor turns into over the hero socials
+// Heights follow each capture's aspect ratio so nothing gets cropped
+const SOCIALS: Record<Social, { image: string; height: number }> = {
+  linkedin:  { image: "/socials/linkedin.png",  height: 262 },
+  github:    { image: "/socials/github.png",    height: 244 },
+  instagram: { image: "/socials/instagram.png", height: 156 },
+};
+
+const BUBBLE_W = 420;
 
 const TEXT_TAGS = new Set([
   "p","h1","h2","h3","h4","h5","h6","span","li","label","em","strong","blockquote",
@@ -16,8 +27,12 @@ export default function Cursor() {
   const rawPos        = useRef({ x: -200, y: -200 });
   const lerpPos       = useRef({ x: -200, y: -200 });
   const raf           = useRef<number>(0);
+  const bubbleWrapRef = useRef<HTMLDivElement>(null);
   const modeRef       = useRef<Mode>("default");
   const [mode, setMode] = useState<Mode>("default");
+  // Last hovered social, kept while the bubble collapses so its content doesn't vanish mid-animation
+  const [social, setSocial] = useState<Social>("linkedin");
+  const [flip, setFlip] = useState(false);
 
   useEffect(() => { modeRef.current = mode; }, [mode]);
 
@@ -28,7 +43,15 @@ export default function Cursor() {
 
     const over = (e: MouseEvent) => {
       const t = e.target as HTMLElement;
-      if (t.closest("[data-cursor='view']"))            setMode("view");
+      const socialEl = t.closest<HTMLElement>("[data-cursor='social']");
+      if (socialEl) {
+        const key = socialEl.dataset.social as Social;
+        if (key in SOCIALS) setSocial(key);
+        // Decided once per hover so the bubble doesn't jump while the cursor moves inside the link
+        if (modeRef.current !== "social") setFlip(rawPos.current.y < SOCIALS[key].height + 40);
+        setMode("social");
+      }
+      else if (t.closest("[data-cursor='view']"))       setMode("view");
       else if (t.closest("a, button"))                  setMode("hover");
       else if (TEXT_TAGS.has(t.tagName?.toLowerCase())) setMode("text");
       else                                              setMode("default");
@@ -43,6 +66,7 @@ export default function Cursor() {
       const tf = `translate(${lerpPos.current.x}px, ${lerpPos.current.y}px)`;
       if (wrapRef.current)      wrapRef.current.style.transform      = tf;
       if (labelWrapRef.current) labelWrapRef.current.style.transform = tf;
+      if (bubbleWrapRef.current) bubbleWrapRef.current.style.transform = tf;
 
       raf.current = requestAnimationFrame(loop);
     };
@@ -60,7 +84,9 @@ export default function Cursor() {
     };
   }, []);
 
-  const size = mode === "view" ? 88 : mode === "hover" ? 40 : mode === "text" ? 60 : 12;
+  const size = mode === "social" ? 0 : mode === "view" ? 88 : mode === "hover" ? 40 : mode === "text" ? 60 : 12;
+  const bubbleOpen = mode === "social";
+  const preview = SOCIALS[social];
 
   return (
     <>
@@ -162,6 +188,35 @@ export default function Cursor() {
         }}>
           View ↗
         </span>
+      </div>
+      {/* Preview bubble — the cursor dot grows into it from the corner sitting on the pointer */}
+      <div
+        ref={bubbleWrapRef}
+        className="fixed top-0 left-0 z-[9999] pointer-events-none"
+        style={{ width: 0, height: 0 }}
+      >
+        <div
+          style={{
+            position:        "absolute",
+            right:            0,
+            width:            BUBBLE_W,
+            height:           preview.height,
+            ...(flip ? { top: 0 } : { bottom: 0 }),
+            overflow:        "hidden",
+            background:      "#ffffff",
+            borderRadius:     bubbleOpen ? (flip ? "22px 4px 22px 22px" : "22px 22px 4px 22px") : "50%",
+            boxShadow:       "0 24px 60px -12px rgba(0,0,0,0.35)",
+            transformOrigin:  flip ? "100% 0" : "100% 100%",
+            transform:        bubbleOpen ? "scale(1)" : "scale(0.03)",
+            opacity:          bubbleOpen ? 1 : 0,
+            transition: bubbleOpen
+              ? "transform 0.55s cubic-bezier(0.34,1.2,0.64,1), border-radius 0.55s cubic-bezier(0.34,1,0.64,1), opacity 0.12s ease"
+              : "transform 0.35s cubic-bezier(0.36,0,0.66,0), border-radius 0.35s ease, opacity 0.2s ease 0.15s",
+          }}
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={preview.image} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "top left", display: "block" }} />
+        </div>
       </div>
     </>
   );

@@ -199,6 +199,8 @@ export default function Hero() {
                 href={social.href}
                 target="_blank"
                 rel="noopener noreferrer"
+                data-cursor="social"
+                data-social={social.label.toLowerCase()}
                 className="flex items-center justify-center border-b border-[#111111]/15 text-[11px] font-semibold text-[#3f3f3d] transition-colors hover:text-[#1677ff]"
                 style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}
               >
@@ -210,7 +212,7 @@ export default function Hero() {
 
         <motion.div
           aria-hidden
-          className="relative col-start-4 row-start-3 hidden items-start justify-center pt-8 text-[#1677ff] sm:flex"
+          className="pointer-events-none relative col-start-4 row-start-3 hidden items-start justify-center pt-8 text-[#1677ff] sm:flex"
           initial={{ opacity: 0, x: -8 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.6, delay: 0.95 }}
