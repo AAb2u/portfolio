@@ -5,6 +5,7 @@ import { scrollToY, lockScroll } from "../lib/smoothScroll";
 
 const links = [
   { label: "About",          href: "#about" },
+  { label: "Services",       href: "#services" },
   { label: "Work",           href: "#work" },
   { label: "Process",        href: "#process" },
   { label: "Drop me a line", href: "#contact" },

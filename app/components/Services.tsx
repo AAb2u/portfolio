@@ -37,7 +37,7 @@ const introEase = [0.16, 1, 0.3, 1] as const;
 
 export default function Services() {
   return (
-    <section className="relative min-h-screen overflow-hidden border-t border-[#eeeeeb]/15 bg-[#111111] text-[#eeeeeb]">
+    <section id="services" className="relative min-h-screen overflow-hidden border-t border-[#eeeeeb]/15 bg-[#111111] text-[#eeeeeb]">
       <div className="pointer-events-none absolute inset-0 hidden grid-cols-[minmax(54px,0.55fr)_repeat(3,minmax(0,1.47fr))_minmax(112px,0.78fr)] grid-rows-[0.72fr_0.9fr_1.55fr_0.8fr] sm:grid">
         {Array.from({ length: 20 }).map((_, index) => (
           <span key={index} className="border-b border-r border-[#eeeeeb]/12 last:border-r-0" />
