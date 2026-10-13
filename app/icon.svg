@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- AA monogram on a transparent background: two interlaced A's, the front one
+       weaving over the back one, tied by the site's blue accent as a crossbar.
+       The weave gaps are real cut-outs (masks), so nothing paints a background.
+       Letters follow the browser theme so they stay visible on light and dark tabs. -->
+  <style>
+    .fg { stroke: #111111; }
+    @media (prefers-color-scheme: dark) { .fg { stroke: #eeeeeb; } }
+  </style>
+  <defs>
+    <clipPath id="c"><rect x="-10" y="7" width="84" height="49"/></clipPath>
+    <!-- back A: cut where the bar and the front A's right leg pass over it -->
+    <mask id="m-back" maskUnits="userSpaceOnUse" x="-10" y="0" width="84" height="64">
+      <rect x="-10" y="0" width="84" height="64" fill="#fff"/>
+      <path d="M16 45.5 H43.5" stroke="#000" stroke-width="9"/>
+      <path d="M22 8 L34 62" stroke="#000" stroke-width="10.5"/>
+    </mask>
+    <!-- bar: cut where the front A's right leg passes over it -->
+    <mask id="m-bar" maskUnits="userSpaceOnUse" x="-10" y="0" width="84" height="64">
+      <rect x="-10" y="0" width="84" height="64" fill="#fff"/>
+      <path d="M22 8 L34 62" stroke="#000" stroke-width="10.5"/>
+    </mask>
+  </defs>
+  <g transform="translate(4.5 0)" clip-path="url(#c)" fill="none" stroke-linejoin="miter" stroke-miterlimit="10">
+    <path class="fg" d="M21 62 L33 8 L45 62" stroke-width="6.5" mask="url(#m-back)"/>
+    <path d="M16 45.5 H43.5" stroke="#1677ff" stroke-width="5" mask="url(#m-bar)"/>
+    <path class="fg" d="M10 62 L22 8 L34 62" stroke-width="6.5"/>
+  </g>
+</svg>
