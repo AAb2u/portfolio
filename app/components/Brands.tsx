@@ -8,6 +8,8 @@ type Kind = "work" | "internship";
 
 type Brand = {
   name: string;
+  // Shorter name for the cursor pill when the full one is long
+  short?: string;
   // In chronological order: a brand can be an internship that turned into a job
   kinds: Kind[];
   logo: string;
@@ -15,16 +17,18 @@ type Brand = {
   hoverLogo?: string;
   role?: string;
   period?: string;
+  // Brand colour the cursor takes over this logo (dark enough for white text)
+  color: string;
   // Optical size: wide wordmarks need less room than tall emblems to look equal
   scale?: number;
 };
 
 const brands: Brand[] = [
-  { name: "Alina", kinds: ["work"], logo: "/brands/alina.png", hoverLogo: "/brands/alina-hover.png", scale: 0.8 },
-  { name: "Brandt", kinds: ["work"], logo: "/brands/brandt.png", scale: 0.8 },
-  { name: "AgroTech Solutions", kinds: ["internship", "work"], logo: "/brands/agrotech.png" },
-  { name: "KPMG", kinds: ["internship"], logo: "/brands/kpmg.png", scale: 0.72 },
-  { name: "Ministry of Higher Education and Scientific Research", kinds: ["internship"], logo: "/brands/mesrs.png" },
+  { name: "Alina", kinds: ["work"], logo: "/brands/alina.png", hoverLogo: "/brands/alina-hover.png", color: "#ff4d00", scale: 0.8 },
+  { name: "Brandt", kinds: ["work"], logo: "/brands/brandt.png", color: "#e4003f", scale: 0.8 },
+  { name: "AgroTech Solutions", kinds: ["internship", "work"], logo: "/brands/agrotech.png", color: "#4f7a1f" },
+  { name: "KPMG", kinds: ["internship"], logo: "/brands/kpmg.png", color: "#00338d", scale: 0.72 },
+  { name: "Ministry of Higher Education and Scientific Research", short: "Ministry of Higher Education", kinds: ["internship"], logo: "/brands/mesrs.png", color: "#06753a" },
 ];
 
 // Cells kept free for brands still to come
@@ -39,6 +43,23 @@ const FILTERS: { key: "all" | Kind; label: string }[] = [
 ];
 
 const introEase = [0.16, 1, 0.3, 1] as const;
+
+// Magnetic logo: it drifts a few px toward the cursor inside its cell
+const MAGNET = 12;
+
+function pullLogo(e: React.MouseEvent<HTMLDivElement>) {
+  const logo = e.currentTarget.querySelector<HTMLElement>("[data-magnet]");
+  if (!logo) return;
+  const r = e.currentTarget.getBoundingClientRect();
+  const x = ((e.clientX - r.left) / r.width - 0.5) * 2;
+  const y = ((e.clientY - r.top) / r.height - 0.5) * 2;
+  logo.style.translate = `${x * MAGNET}px ${y * MAGNET}px`;
+}
+
+function releaseLogo(e: React.MouseEvent<HTMLDivElement>) {
+  const logo = e.currentTarget.querySelector<HTMLElement>("[data-magnet]");
+  if (logo) logo.style.translate = "0px 0px";
+}
 
 // Filled dot = worked there, ring = internship
 function KindMark({ kind }: { kind: Kind }) {
@@ -119,6 +140,12 @@ export default function Brands() {
               transition={{ duration: 0.6, delay: (index % 3) * 0.08, ease: introEase }}
             >
               <div
+                data-sound="row"
+                data-cursor="brand"
+                data-cursor-label={brand.short ?? brand.name}
+                data-cursor-color={brand.color}
+                onMouseMove={pullLogo}
+                onMouseLeave={releaseLogo}
                 className="group relative flex aspect-[4/3] flex-col justify-between p-4 transition-opacity duration-500 sm:aspect-[16/10] sm:p-6"
                 style={{ opacity: dimmed ? 0.18 : 1 }}
               >
@@ -133,7 +160,11 @@ export default function Brands() {
                 </span>
 
                 {/* With a mouse, logos stay quiet in grayscale and come to life on hover; touch screens show them in colour */}
-                <div className="relative mx-auto h-[58%] w-[64%]" style={{ scale: brand.scale ?? 1 }}>
+                <div
+                  data-magnet
+                  className="relative mx-auto h-[58%] w-[64%] transition-[translate] duration-500 ease-out"
+                  style={{ scale: brand.scale ?? 1 }}
+                >
                   <Image
                     src={brand.logo}
                     alt={brand.name}
