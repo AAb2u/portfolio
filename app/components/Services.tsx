@@ -1,35 +1,50 @@
 "use client";
 
+import type { ComponentType, CSSProperties } from "react";
 import { motion } from "framer-motion";
-import Image from "next/image";
+import { SoftwareFigure, UiFigure, WebFigure } from "./ServiceFigures";
 
 type Service = {
   num: string;
   title: string;
   desc: string;
-  gif: string;
-  clip?: string;
+  // Interactive line figure: answers the pointer, plays on its own otherwise
+  Figure: ComponentType<{ className?: string; label: string }>;
+  figureLabel: string;
 };
+
+// Figure palette for this dark section. The plate must match the background:
+// it hides what is drawn behind each block.
+const FIGURE_THEME = {
+  "--fig-plate": "#111111",
+  "--fig-hi": "#eeeeeb",
+  "--fig-edge": "#8a8a85",
+  "--fig-mid": "#55554f",
+  "--fig-lo": "#2c2c29",
+  "--fig-accent": "#1677ff",
+} as CSSProperties;
 
 const services: Service[] = [
   {
     num: "01",
     title: "Web Development",
     desc: "Building performant web applications with React, Next.js and Node.js, from idea to production.",
-    gif: "/gif/web-111.gif",
+    Figure: WebFigure,
+    figureLabel: "A web page seen through an X-ray lens that reveals the markup it is built from",
   },
   {
     num: "02",
     title: "Software Engineering",
     desc: "Architecting clean, structured software with C#, C++, Java and .NET using OOP and MVVM patterns.",
-    gif: "/gif/software-111.gif",
-    clip: "inset(0 0 12% 0)",
+    Figure: SoftwareFigure,
+    figureLabel: "Gears you crank with the pointer, turning raw blocks of code into compiled ones",
   },
   {
     num: "03",
     title: "UI / UX Design",
     desc: "Designing intuitive interfaces and seamless user experiences that look great and convert.",
-    gif: "/gif/uiux-111.gif",
+    Figure: UiFigure,
+    figureLabel: "A phone that tilts toward the pointer while its interface lifts off the screen like a hologram",
   },
 ];
 
@@ -81,18 +96,9 @@ export default function Services() {
                   {service.num}
                 </span>
 
-                <div className="relative mt-2 h-32 w-full sm:mt-6 sm:h-44">
-                  <Image
-                    src={service.gif}
-                    alt={service.title}
-                    fill
-                    unoptimized
-                    sizes="(max-width: 640px) 100vw, 28vw"
-                    className="object-contain object-left opacity-65 sm:opacity-80"
-                    style={{
-                      clipPath: service.clip ?? "none",
-                    }}
-                  />
+                {/* Bleeds into the column padding so the drawing gets the whole column */}
+                <div className="mt-4 max-w-[420px] sm:-mx-10 sm:mt-6 lg:-mx-16" style={FIGURE_THEME}>
+                  <service.Figure label={service.figureLabel} className="w-full" />
                 </div>
               </div>
 
