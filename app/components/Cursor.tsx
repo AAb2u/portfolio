@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 
-type Mode = "default" | "hover" | "text" | "view" | "social";
+type Mode = "default" | "hover" | "text" | "view" | "social" | "brand";
 type Social = "linkedin" | "github" | "instagram";
 
 // Previews shown in the bubble the cursor turns into over the hero socials
@@ -28,11 +28,14 @@ export default function Cursor() {
   const lerpPos       = useRef({ x: -200, y: -200 });
   const raf           = useRef<number>(0);
   const bubbleWrapRef = useRef<HTMLDivElement>(null);
+  const pillWrapRef   = useRef<HTMLDivElement>(null);
   const modeRef       = useRef<Mode>("default");
   const [mode, setMode] = useState<Mode>("default");
   // Last hovered social, kept while the bubble collapses so its content doesn't vanish mid-animation
   const [social, setSocial] = useState<Social>("linkedin");
   const [flip, setFlip] = useState(false);
+  // Brand pill (Experience logos): kept after leaving so it can shrink away with its content
+  const [brand, setBrand] = useState({ label: "", color: "#111111" });
 
   useEffect(() => { modeRef.current = mode; }, [mode]);
 
@@ -51,6 +54,11 @@ export default function Cursor() {
         if (modeRef.current !== "social") setFlip(rawPos.current.y < SOCIALS[key].height + 40);
         setMode("social");
       }
+      else if (t.closest("[data-cursor='brand']")) {
+        const el = t.closest<HTMLElement>("[data-cursor='brand']")!;
+        setBrand({ label: el.dataset.cursorLabel ?? "", color: el.dataset.cursorColor ?? "#111111" });
+        setMode("brand");
+      }
       else if (t.closest("[data-cursor='view']"))       setMode("view");
       else if (t.closest("a, button"))                  setMode("hover");
       else if (TEXT_TAGS.has(t.tagName?.toLowerCase())) setMode("text");
@@ -67,6 +75,7 @@ export default function Cursor() {
       if (wrapRef.current)      wrapRef.current.style.transform      = tf;
       if (labelWrapRef.current) labelWrapRef.current.style.transform = tf;
       if (bubbleWrapRef.current) bubbleWrapRef.current.style.transform = tf;
+      if (pillWrapRef.current)   pillWrapRef.current.style.transform   = tf;
 
       raf.current = requestAnimationFrame(loop);
     };
@@ -84,8 +93,9 @@ export default function Cursor() {
     };
   }, []);
 
-  const size = mode === "social" ? 0 : mode === "view" ? 88 : mode === "hover" ? 40 : mode === "text" ? 60 : 12;
+  const size = mode === "social" || mode === "brand" ? 0 : mode === "view" ? 88 : mode === "hover" ? 40 : mode === "text" ? 60 : 12;
   const bubbleOpen = mode === "social";
+  const pillOpen = mode === "brand";
   const preview = SOCIALS[social];
 
   return (
@@ -216,6 +226,38 @@ export default function Cursor() {
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={preview.image} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "top left", display: "block" }} />
+        </div>
+      </div>
+      {/* Brand pill — over an Experience logo the dot swells into a pill in the brand's colour */}
+      <div
+        ref={pillWrapRef}
+        className="fixed top-0 left-0 z-[9999] pointer-events-none"
+        style={{ width: 0, height: 0 }}
+      >
+        <div
+          style={{
+            position:        "absolute",
+            left:             0,
+            top:              0,
+            translate:       "-50% -50%",
+            padding:         "9px 16px",
+            borderRadius:     999,
+            background:       brand.color,
+            color:           "#ffffff",
+            fontSize:        "0.72rem",
+            fontWeight:       600,
+            letterSpacing:   "0.04em",
+            whiteSpace:      "nowrap",
+            userSelect:      "none",
+            boxShadow:       "0 10px 30px -10px rgba(0,0,0,0.35)",
+            transform:        pillOpen ? "scale(1)" : "scale(0.1)",
+            opacity:          pillOpen ? 1 : 0,
+            transition: pillOpen
+              ? "transform 0.45s cubic-bezier(0.34,1.4,0.64,1), opacity 0.15s ease, background-color 0.3s ease"
+              : "transform 0.25s cubic-bezier(0.36,0,0.66,0), opacity 0.2s ease",
+          }}
+        >
+          {brand.label}
         </div>
       </div>
     </>
