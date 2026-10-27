@@ -9,6 +9,14 @@ const COLLAPSE_BZ = "cubic-bezier(0.36, 0, 0.66, 0)";
 
 const projects = [
   {
+    name: "Kloop",
+    desc: "ERP for brands and distributors",
+    tags: "SaaS, Web Design, Web Development",
+    year: "/26",
+    href: "https://kloop-nu.vercel.app/",
+    image: "/projects/Kloop.png",
+  },
+  {
     name: "EasySave",
     desc: ".NET backup program",
     tags: "C#, .NET, Software Engineering",
@@ -54,7 +62,6 @@ export default function Work() {
   const listRef = useRef<HTMLDivElement>(null);
   const baseImgRef = useRef<HTMLImageElement>(null);
   const overlayImgRef = useRef<HTMLImageElement>(null);
-  const pairRef = useRef<[number, number]>([0, 1]);
   const hoveredRef = useRef(false);
 
   useEffect(() => {
@@ -105,13 +112,17 @@ export default function Work() {
           : Math.min(Math.max((y - centers[lower]) / (centers[upper] - centers[lower]), 0), 1);
 
         // Swap sources imperatively (not via state) so src and clip change in
-        // the same frame — no flash when crossing a title centre.
-        if (pairRef.current[0] !== lower || pairRef.current[1] !== upper) {
-          pairRef.current = [lower, upper];
-          baseImgRef.current.src = projects[lower].image;
-          baseImgRef.current.alt = projects[lower].name;
-          overlayImgRef.current.src = projects[upper].image;
-          overlayImgRef.current.alt = projects[upper].name;
+        // the same frame — no flash when crossing a title centre. Image and name
+        // are read from the rows themselves, so they always match what's on
+        // screen (even if the project list changes during a hot reload).
+        const lowerRow = rows[lower];
+        const upperRow = rows[upper];
+        if (baseImgRef.current.getAttribute("src") !== lowerRow.dataset.projectImage
+          || overlayImgRef.current.getAttribute("src") !== upperRow.dataset.projectImage) {
+          baseImgRef.current.src = lowerRow.dataset.projectImage ?? "";
+          baseImgRef.current.alt = lowerRow.dataset.projectName ?? "";
+          overlayImgRef.current.src = upperRow.dataset.projectImage ?? "";
+          overlayImgRef.current.alt = upperRow.dataset.projectName ?? "";
         }
         // Halfway between two titles: top half = upper site, bottom half = lower site
         overlayImgRef.current.style.clipPath = `inset(${(1 - t) * 100}% 0% 0% 0%)`;
@@ -262,6 +273,8 @@ export default function Work() {
               className="relative block min-h-[210px] px-0 py-10 sm:min-h-[180px] sm:px-16"
               data-cursor="view"
               data-project-index={i}
+              data-project-image={p.image}
+              data-project-name={p.name}
               data-sound="row"
               onMouseEnter={() => {
                 lerpPos.current = { ...rawPos.current };
