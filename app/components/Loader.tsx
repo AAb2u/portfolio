@@ -11,9 +11,6 @@ export default function Loader() {
     const unlock = lockScroll();
 
     const ASSETS = [
-      "/gif/web-111.gif",
-      "/gif/software-111.gif",
-      "/gif/uiux-111.gif",
       "/projects/EasySave.png",
       "/projects/portfolio.png",
     ];
